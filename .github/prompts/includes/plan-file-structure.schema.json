@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://oportun.com/shared-payload-cache/plan-file-structure.schema.json",
+  "title": "Implementation Plan File",
+  "type": "object",
+  "required": ["summary", "assumptions", "acceptanceCriteria", "approach", "steps", "effortRisks", "fileChangeList", "testPlan", "rollout", "handoff"],
+  "additionalProperties": true,
+  "properties": {
+    "summary": {"type": "object", "required": ["ticket", "oneLiner"], "properties": {"ticket": {"type": "string"}, "oneLiner": {"type": "string"}}},
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "openQuestions": {"type": "array", "items": {"type": "string"}},
+    "acceptanceCriteria": {"type": "array", "items": {"type": "string"}, "minItems": 1},
+    "approach": {"type": "object"},
+    "steps": {"type": "array", "items": {"type": "object", "required": ["order", "description"], "properties": {"order": {"type": "integer"}, "description": {"type": "string"}}}},
+    "effortRisks": {"type": "object"},
+    "fileChangeList": {"type": "array", "items": {"type": "string"}},
+    "testPlan": {"type": "object"},
+    "rollout": {"type": "object"},
+    "handoff": {"type": "object"},
+    "traceabilityMap": {"type": "array", "items": {"type": "object", "required": ["criterion", "tests"], "properties": {"criterion": {"type": "string"}, "tests": {"type": "array", "items": {"type": "string"}}}}}
+  }
+}

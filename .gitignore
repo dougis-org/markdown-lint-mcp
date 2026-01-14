@@ -16,3 +16,7 @@ yarn-error.log*
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
+
+
+#Ignore vscode AI rules
+.github/instructions/codacy.instructions.md
