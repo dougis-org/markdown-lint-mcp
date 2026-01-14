@@ -1,96 +1,361 @@
 # Contributing to markdownlint-mcp
 
-Thank you for your interest in contributing to markdownlint-mcp! This document provides guidelines and instructions for contributing to this project.
+Thank you for your interest in contributing to this project! This comprehensive guide will help you get started with development, testing, and contribution workflows.
 
 ## Table of Contents
 
-- [Contributing to markdownlint-mcp](#contributing-to-markdownlint-mcp)
-  - [Table of Contents](#table-of-contents)
-  - [Code of Conduct](#code-of-conduct)
-  - [Getting Started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [Setting Up the Development Environment](#setting-up-the-development-environment)
-  - [Development Workflow](#development-workflow)
-  - [Pull Request Process](#pull-request-process)
-  - [Testing Guidelines](#testing-guidelines)
-    - [Writing Tests](#writing-tests)
-  - [Coding Standards](#coding-standards)
-    - [TypeScript Best Practices](#typescript-best-practices)
-  - [Documentation](#documentation)
-  - [Issue Reporting](#issue-reporting)
-    - [Bug Reports](#bug-reports)
-    - [Feature Requests](#feature-requests)
-  - [License](#license)
+- [System Requirements](#system-requirements)
+- [Installation & Setup](#installation--setup)
+- [Development Workflow](#development-workflow)
+- [Code Quality Standards](#code-quality-standards)
+- [Testing](#testing)
+- [Before You Submit](#before-you-submit)
+- [Pull Request Process](#pull-request-process)
+- [Issue Reporting](#issue-reporting)
+- [License](#license)
 
-## Code of Conduct
+---
 
-This project adheres to a Code of Conduct that all contributors are expected to follow. By participating, you are expected to uphold this code. Please report unacceptable behavior to the project maintainers.
+## System Requirements
 
-## Getting Started
+### Required Software
 
-### Prerequisites
+- **Node.js**: Version 20.0.0 or higher
+  - Recommended: Node.js 24.x or 25.x for best compatibility
+  - Verify with: `node --version`
+  - Installation: https://nodejs.org/
 
-- Node.js (v16 or later)
-- npm (v7 or later)
+- **npm**: Version 7.0.0 or higher (comes with Node.js)
+  - Verify with: `npm --version`
 
-### Setting Up the Development Environment
+### Supported Node.js Versions
 
-1. Fork the repository on GitHub
-2. Clone your fork locally
-   ```bash
-   git clone https://github.com/YOUR-USERNAME/markdownlint-mcp.git
-   cd markdownlint-mcp
-   ```
-3. Install dependencies
-   ```bash
-   npm install
-   ```
-4. Build the project
-   ```bash
-   npm run build
-   ```
+The project is tested and supported on:
+- Node.js 20.x (Iron) - LTS
+- Node.js 22.x (Jod) - LTS
+- Node.js 24.x (Krypton) - LTS
+- Node.js 25.x (Current)
+
+### Optional Tools
+
+- **Git**: For version control (required for cloning and contributing)
+  - Verify with: `git --version`
+  - Installation: https://git-scm.com/
+- **VS Code** or preferred code editor (recommended for development)
+
+---
+
+## Installation & Setup
+
+### Step 1: Fork and Clone the Repository
+
+```bash
+# Fork on GitHub (visit https://github.com/ernestgwilsonii/markdownlint-mcp)
+# Then clone your fork
+git clone https://github.com/YOUR-USERNAME/markdownlint-mcp.git
+cd markdownlint-mcp
+
+# Add upstream remote to stay synchronized
+git remote add upstream https://github.com/ernestgwilsonii/markdownlint-mcp.git
+```
+
+### Step 2: Install All Dependencies
+
+```bash
+npm install
+```
+
+This command automatically installs all required tools. Running `npm install` will install both production and development dependencies specified in `package.json`. All tools needed for npm scripts are included and will be installed automatically.
+
+**Production Dependencies:**
+- `@modelcontextprotocol/sdk@^1.25.0` - Model Context Protocol SDK for building MCP servers
+- `markdownlint@^0.40.0` - Core markdown linting engine
+
+**Development Dependencies (Automatically Installed):**
+- `typescript@^5.9.0` - TypeScript compiler for strict type checking
+  - Used by: `npm run build`, `npm run dev`
+- `ts-jest@^29.4.0` - Jest preset for TypeScript support
+  - Used by: `npm test`, `npm run test:watch`, `npm run test:coverage`
+- `jest@^30.2.0` - Testing framework
+  - Used by: `npm test`, `npm run test:watch`, `npm run test:coverage`
+- `@jest/globals@^30.2.0` - Jest global types
+  - Used by: jest tests
+- `@types/jest@^30.0.0` - Jest type definitions
+  - Used by: jest tests
+- `@types/node@^25.0.0` - Node.js API types
+  - Used by: TypeScript compilation
+- `eslint@^9.0.0` - Code linting tool
+  - Used by: `npm run lint`, `npm run lint:fix`
+- `@typescript-eslint/eslint-plugin@^8.53.0` - TypeScript linting rules
+  - Used by: `npm run lint`, `npm run lint:fix`
+- `@typescript-eslint/parser@^8.53.0` - TypeScript parser for ESLint
+  - Used by: `npm run lint`, `npm run lint:fix`
+- `eslint-config-prettier@^10.0.0` - Prettier integration for ESLint
+  - Used by: `npm run lint`, `npm run lint:fix`
+- `eslint-plugin-prettier@^5.5.0` - ESLint plugin for Prettier formatting
+  - Used by: `npm run lint`, `npm run lint:fix`
+- `eslint-plugin-jest@^29.12.0` - ESLint plugin for Jest best practices
+  - Used by: `npm run lint`, `npm run lint:fix`
+- `prettier@^3.7.0` - Code formatter
+  - Used by: `npm run format`
+
+All these tools are installed automatically when you run `npm install` - no additional installation steps are needed.
+
+### Step 3: Verify Installation
+
+Test that everything is working:
+
+```bash
+npm run build    # Compiles TypeScript to dist/
+npm test         # Runs full test suite
+npm run lint     # Checks code quality with ESLint
+```
+
+All three commands should complete successfully without errors.
+
+---
 
 ## Development Workflow
 
-1. Create a new branch for your feature or bug fix
+### Project Structure
+
+```
+markdownlint-mcp/
+├── src/                       # TypeScript source code
+│   ├── index.ts              # Main MCP server entry point
+│   ├── tools/                # MCP tool implementations
+│   │   ├── lintMarkdown.ts
+│   │   ├── fixMarkdown.ts
+│   │   └── getConfiguration.ts
+│   └── utils/                # Utility modules
+├── tests/                     # Jest test files (*.test.ts)
+├── dist/                      # Compiled JavaScript output (generated)
+├── .github/
+│   └── workflows/            # GitHub Actions CI/CD
+├── coverage/                 # Test coverage reports (generated)
+├── node_modules/             # Installed dependencies (generated)
+├── package.json              # Project metadata and dependencies
+├── package-lock.json         # Dependency lock file
+├── tsconfig.json             # TypeScript compiler options
+├── jest.config.js            # Jest testing configuration
+├── .eslintrc.js              # ESLint linting rules
+├── .prettierrc                # Prettier formatting rules
+├── README.md                 # User-facing documentation
+└── CONTRIBUTING.md           # This file
+```
+
+### Build & Compilation
+
+```bash
+# TypeScript compilation (one-time)
+npm run build
+
+# Clean rebuild
+rm -rf dist && npm run build
+```
+
+Output goes to `dist/` directory as CommonJS modules.
+
+### Running the Server
+
+```bash
+# Start the compiled MCP server
+npm start
+
+# Development mode with auto-reload
+npm run dev
+```
+
+### Code Formatting
+
+```bash
+# Automatically format all code with Prettier
+npm run format
+
+# Format specific file
+npx prettier --write src/myfile.ts
+
+# Check what would be formatted (without applying)
+npx prettier --check src/
+```
+
+### Running the Linter
+
+```bash
+# Check for linting issues
+npm run lint
+
+# Automatically fix fixable linting issues
+npm run lint:fix
+
+# Lint specific file
+npx eslint src/myfile.ts --fix
+```
+
+---
+
+## Code Quality Standards
+
+### TypeScript Configuration
+
+The project uses strict TypeScript settings (`tsconfig.json`):
+
+- **Strict mode**: Full type checking enabled
+- **Target**: ES2022 JavaScript standard
+- **Module system**: ESNext with node resolution
+- **Source maps**: Generated for debugging
+
+### ESLint Rules
+
+Key linting rules are enforced:
+
+- **Code formatting**: Prettier integration mandatory
+- **Console usage**: Only `warn` and `error` are allowed
+- **Type annotations**: Explicit function return types not required, but consider them
+- **Any types**: Warned when used (avoid `any` when possible)
+- **Unused variables**: Error - unused parameters must be prefixed with `_`
+- **Jest best practices**: Tests must be valid and not disabled/focused
+
+### Code Style
+
+Prettier formats code with these settings:
+
+- **Line width**: 100 characters
+- **Indentation**: 2 spaces
+- **Quotes**: Single quotes for JavaScript
+- **Semicolons**: Required
+- **Trailing commas**: ES5 compatible
+- **Bracket spacing**: `{ foo: bar }`
+- **Arrow functions**: Parentheses avoided where possible
+
+---
+
+## Testing
+
+### Running Tests
+
+```bash
+# Run all tests once
+npm test
+
+# Run tests in watch mode (re-runs on file changes)
+npm test:watch
+
+# Generate coverage report
+npm test:coverage
+
+# Run specific test file
+npm test -- path/to/test.test.ts
+
+# Run tests matching pattern
+npm test -- --testNamePattern="lint"
+```
+
+### Test Structure
+
+Tests are located in the `tests/` directory with `*.test.ts` naming convention.
+
+**Jest Configuration:**
+- **Test environment**: Node.js
+- **Preset**: ts-jest for TypeScript support
+- **Coverage threshold**: Minimum 80% for branches, functions, lines, and statements
+
+### Writing Tests
+
+1. **Follow existing patterns** in `tests/` directory
+2. **Use descriptive test names**: `describe` blocks and `it()` statements should be clear
+3. **Test both happy paths and edge cases**
+4. **Maintain 80%+ coverage** for new code
+5. **Mock external dependencies** appropriately
+
+### Coverage Requirements
+
+- **Minimum 80% coverage** across all metrics
+- Coverage reports generated in `coverage/` directory
+- Check coverage: `npm run test:coverage`
+
+---
+
+## Before You Submit
+
+### Pre-commit Checklist
+
+Before pushing or creating a pull request, ensure:
+
+```bash
+# 1. Build compiles without errors
+npm run build
+
+# 2. All tests pass
+npm test
+
+# 3. No linting errors
+npm run lint
+
+# 4. Code is properly formatted
+npm run format
+
+# 5. Coverage meets threshold
+npm run test:coverage
+```
+
+Or run all checks at once:
+
+```bash
+npm run prepublishOnly  # Runs test and lint
+```
+
+### Git Workflow
+
+1. **Create a feature branch** from `main`:
    ```bash
    git checkout -b feature/your-feature-name
    ```
-   or
+
+2. **Make your changes** with atomic commits:
    ```bash
-   git checkout -b fix/your-bug-fix
+   git commit -m "feat: descriptive message"
    ```
 
-2. Make your changes, following the [coding standards](#coding-standards)
-
-3. Add tests for your changes (see [testing guidelines](#testing-guidelines))
-
-4. Run the tests to make sure everything passes
-   ```bash
-   npm test
-   ```
-
-5. Run linting to ensure code quality
-   ```bash
-   npm run lint
-   ```
-
-6. Build the project to ensure it compiles correctly
-   ```bash
-   npm run build
-   ```
-
-7. Commit your changes using a descriptive commit message
-   ```bash
-   git commit -m "feat: add new feature" -m "Description of the changes and why they were made"
-   ```
-
-8. Push your branch to GitHub
+3. **Push to your fork**:
    ```bash
    git push origin feature/your-feature-name
    ```
 
-9. Submit a pull request to the main repository
+4. **Create a Pull Request** with:
+   - Clear title describing the change
+   - Description of what and why
+   - Link to any related issues
+   - Evidence that tests pass and coverage maintained
+
+### Commit Message Convention
+
+Follow conventional commits for clarity:
+
+- `feat:` - New feature
+- `fix:` - Bug fix
+- `docs:` - Documentation only
+- `style:` - Code style/formatting
+- `refactor:` - Code refactoring
+- `perf:` - Performance improvement
+- `test:` - Adding/updating tests
+- `ci:` - CI/CD changes
+
+### Pull Request Requirements
+
+Your PR must:
+
+- ✅ Pass all CI/CD checks (GitHub Actions)
+  - Build succeeds on Node.js 20.x, 22.x, 24.x, and 25.x
+  - All tests pass
+  - Linting passes
+- ✅ Maintain or improve code coverage (minimum 80%)
+- ✅ Include tests for new functionality
+- ✅ Update documentation if needed
+- ✅ Have a clear, descriptive title and description
+- ✅ Be based on current `main` branch
+
+---
 
 ## Pull Request Process
 
@@ -100,58 +365,79 @@ This project adheres to a Code of Conduct that all contributors are expected to 
 4. Your pull request will be reviewed by at least one maintainer
 5. Once approved, your pull request will be merged by a maintainer
 
-## Testing Guidelines
+---
 
-- All new features should include unit tests
-- Bug fixes should include tests that demonstrate the issue is fixed
-- Tests should be placed in the `test` directory, mirroring the structure of the `src` directory
-- Run tests using `npm test`
-- Aim for high test coverage (>90%)
+## CI/CD Pipeline
 
-### Writing Tests
+The project uses GitHub Actions for automated testing and publishing.
 
-We use Jest for testing. Here's an example of a test:
+### On Pull Request
 
-```typescript
-import { functionToTest } from '../src/yourModule';
+- Tests run on Node.js 20.x, 22.x, 24.x, and 25.x
+- Code is linted with ESLint
+- Coverage reports uploaded to Codecov on Node.js 25.x (latest)
+- Build artifacts verified
 
-describe('functionToTest', () => {
-  it('should handle normal input correctly', () => {
-    expect(functionToTest('normal input')).toBe('expected output');
-  });
+### On Release
 
-  it('should handle edge cases', () => {
-    expect(functionToTest('')).toBe('expected output for empty string');
-  });
-});
+- Package is automatically published to NPM using Node.js 24.x LTS
+- Requires all tests to pass
+- Triggered when a release is created on GitHub
+
+---
+
+## Troubleshooting
+
+### Build Fails
+
+```bash
+# Clear cache and reinstall
+rm -rf node_modules package-lock.json dist/
+npm install
+npm run build
 ```
 
-## Coding Standards
+### Tests Fail with Type Errors
 
-This project follows a set of coding standards to ensure consistency across the codebase:
+```bash
+# Ensure TypeScript compilation works
+npx tsc --noEmit
 
-- We use TypeScript for type safety
-- Follow the ESLint and Prettier configurations provided in the project
-- Use meaningful variable and function names
-- Write descriptive comments for complex logic
-- Follow the single responsibility principle
-- Keep functions small and focused
-- Use proper error handling with detailed error messages
+# Regenerate types
+npm install
+```
 
-### TypeScript Best Practices
+### Linting Issues Won't Fix
 
-- Use explicit types where beneficial for readability
-- Avoid the `any` type unless absolutely necessary
-- Use interfaces for object shapes
-- Use proper access modifiers in classes (public, private, protected)
-- Use async/await for asynchronous code
+```bash
+# Try ESLint with --fix flag explicitly
+npx eslint src --ext .ts --fix
 
-## Documentation
+# Then format with Prettier
+npm run format
+```
 
-- Update the README.md with any necessary changes
-- Update the USAGE.md for any user-facing changes
-- Add JSDoc comments to functions and classes
-- Keep API documentation up to date
+### Coverage Below Threshold
+
+```bash
+# Check which files are missing coverage
+npm run test:coverage
+
+# Review coverage report
+open coverage/lcov-report/index.html
+```
+
+---
+
+## Resources
+
+- **Model Context Protocol**: https://modelcontextprotocol.io/
+- **markdownlint Rules**: https://github.com/DavidAnson/markdownlint/blob/main/README.md#rules
+- **TypeScript Handbook**: https://www.typescriptlang.org/docs/
+- **Jest Documentation**: https://jestjs.io/docs/getting-started
+- **ESLint Guide**: https://eslint.org/docs/rules/
+
+---
 
 ## Issue Reporting
 
@@ -175,10 +461,12 @@ For feature requests, please include:
 3. Any relevant examples or use cases
 4. An explanation of why this feature would be valuable
 
+---
+
 ## License
 
 By contributing to this project, you agree that your contributions will be licensed under the same [MIT License](LICENSE) that covers the project.
 
 ---
 
-Thank you for contributing to markdownlint-mcp!
+Thank you for contributing to markdownlint-mcp! 🎉
