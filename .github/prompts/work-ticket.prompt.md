@@ -67,7 +67,7 @@ Additional validation:
 3.5 Config / env vars (+ validation)
 3.6 Migrations (backward compatible)
 3.7 Feature flag wiring (default OFF)
-3.8 Iterate `./gradlew test` until GREEN
+3.8 Iterate `npm test` until GREEN
 3.9 Refactor (no behavior change)
 
 ---
@@ -84,10 +84,10 @@ Additional validation:
 ## Phase 5: Quality Gates
 | Gate | Command / Action | Pass |
 |------|------------------|------|
-| Build & Unit | `./gradlew test` | All green |
-| Integration | `./gradlew integrationTest` (if exists) | Green |
+| Build & Unit | `npm test` | All green |
+| Integration | `npm run test:watch` (if needed) | Green |
 | Contract/API | Contract suite | All validate |
-| Lint/Style | All applicable linters (Spotless, ESLint, Markdownlint, etc.) | No blocking issues |
+| Lint/Style | All applicable linters (ESLint, Markdownlint, Prettier) | No blocking issues |
 | Schema Drift | `node scripts/check-schema-drift.js` (if schema changed) | No drift |
 | Security/Input | Review validation & logging | Safe, no secrets |
 | Feature Flags | Confirm default OFF or justified | Documented |

@@ -239,10 +239,10 @@ Prettier formats code with these settings:
 npm test
 
 # Run tests in watch mode (re-runs on file changes)
-npm test:watch
+npm run test:watch
 
 # Generate coverage report
-npm test:coverage
+npm run test:coverage
 
 # Run specific test file
 npm test -- path/to/test.test.ts

@@ -204,7 +204,7 @@ Phases (RED → GREEN → Refactor). Enumerate steps with file specificity:
   * Remove dead code, unused imports, commented blocks
   * Eliminate over-engineering (speculative abstractions, unnecessary indirection, premature optimization)
   * Run static analysis (Codacy, linters), address findings
-  * Apply formatters (`./gradlew spotlessApply`)
+  * Apply formatters (`npm run format`)
   * Document remaining complexity with rationale
 - Docs & artifact updates (README, CHANGELOG, OpenAPI, drift script)
   Include validation command(s) for schema drift & build.
