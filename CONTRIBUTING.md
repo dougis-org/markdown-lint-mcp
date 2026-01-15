@@ -20,8 +20,9 @@ Thank you for your interest in contributing to this project! This comprehensive 
 
 ### Required Software
 
-- **Node.js**: Version 20.0.0 or higher
-  - Recommended: Node.js 24.x or 25.x for best compatibility
+- **Node.js**: Version 20.0.0 or higher (LTS recommended)
+  - Officially tested on: Node.js 20.x and 22.x (LTS)
+  - Newer Node.js versions (e.g., 24.x, 25.x) may work but are not guaranteed in CI
   - Verify with: `node --version`
   - Installation: https://nodejs.org/
 
@@ -30,11 +31,11 @@ Thank you for your interest in contributing to this project! This comprehensive 
 
 ### Supported Node.js Versions
 
-The project is tested and supported on:
-- Node.js 20.x (Iron) - LTS
-- Node.js 22.x (Jod) - LTS
-- Node.js 24.x (Krypton) - LTS
-- Node.js 25.x (Current)
+The project is officially tested and supported on:
+- Node.js 20.x (LTS)
+- Node.js 22.x (LTS)
+
+Note: Node.js 24.x and 25.x may work, but they are not part of the official CI matrix and may have incompatibilities.
 
 ### Optional Tools
 
@@ -52,6 +53,7 @@ The project is tested and supported on:
 ```bash
 # Fork on GitHub (visit https://github.com/ernestgwilsonii/markdownlint-mcp)
 # Then clone your fork
+# Use the clone URL shown on your fork's GitHub page (replace YOUR-USERNAME and repo name if you renamed it):
 git clone https://github.com/YOUR-USERNAME/markdownlint-mcp.git
 cd markdownlint-mcp
 
@@ -137,9 +139,9 @@ markdownlint-mcp/
 ├── package.json              # Project metadata and dependencies
 ├── package-lock.json         # Dependency lock file
 ├── tsconfig.json             # TypeScript compiler options
-├── jest.config.js            # Jest testing configuration
-├── .eslintrc.js              # ESLint linting rules
-├── .prettierrc                # Prettier formatting rules
+├── jest.config.cjs           # Jest testing configuration
+├── eslint.config.cjs         # ESLint (flat) configuration
+├── .prettierrc               # Prettier formatting rules
 ├── README.md                 # User-facing documentation
 └── CONTRIBUTING.md           # This file
 ```
@@ -154,7 +156,7 @@ npm run build
 rm -rf dist && npm run build
 ```
 
-Output goes to `dist/` directory as CommonJS modules.
+Output goes to `dist/` directory as ES modules.
 
 ### Running the Server
 
@@ -346,7 +348,7 @@ Follow conventional commits for clarity:
 Your PR must:
 
 - ✅ Pass all CI/CD checks (GitHub Actions)
-  - Build succeeds on Node.js 20.x, 22.x, 24.x, and 25.x
+  - Build succeeds on Node.js 20.x and 22.x (official CI matrix)
   - All tests pass
   - Linting passes
 - ✅ Maintain or improve code coverage (minimum 80%)
@@ -373,14 +375,14 @@ The project uses GitHub Actions for automated testing and publishing.
 
 ### On Pull Request
 
-- Tests run on Node.js 20.x, 22.x, 24.x, and 25.x
+- Tests run on Node.js 20.x and 22.x (official CI matrix). Newer Node.js versions may be tried in separate workflows.
 - Code is linted with ESLint
-- Coverage reports uploaded to Codecov on Node.js 25.x (latest)
+- Coverage reports uploaded to Codecov on the project's designated runner (currently Node.js 22.x)
 - Build artifacts verified
 
 ### On Release
 
-- Package is automatically published to NPM using Node.js 24.x LTS
+- Package is automatically published to NPM using a maintained LTS Node.js version (e.g., Node.js 22.x)
 - Requires all tests to pass
 - Triggered when a release is created on GitHub
 
