@@ -1,5 +1,5 @@
 export default {
-  preset: 'ts-jest',
+  preset: 'ts-jest/presets/default-esm',
   testEnvironment: 'node',
   testMatch: ['**/tests/**/*.test.ts'],
   collectCoverageFrom: [
@@ -18,8 +18,10 @@ export default {
   transform: {
     '^.+\\.tsx?$': ['ts-jest', {
       useESM: true,
-    }]
+    }],
+    '^.+\\.mjs$': ['babel-jest', {}]
   },
+  transformIgnorePatterns: ['node_modules/(?!markdownlint)'],
   extensionsToTreatAsEsm: ['.ts'],
   moduleNameMapper: {
     '^(\\.{1,2}/.*)\\.js$': '$1'

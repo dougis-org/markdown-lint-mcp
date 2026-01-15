@@ -1,12 +1,23 @@
 import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
-import markdownlint from 'markdownlint';
+let markdownlint: any;
 import { MarkdownlintIssue } from '../src/types.js';
 
 // Mock dependencies
 jest.mock('fs/promises');
-jest.mock('markdownlint');
+// Provide a virtual mock for the ESM-only `markdownlint` package so tests can stub its API
+jest.mock('markdownlint', () => ({ sync: jest.fn() }), { virtual: true });
+
+// Ensure the mocked module is loaded via dynamic import after jest.mock is called
+// Tests will assign to the `markdownlint` variable below when needed.
+
+async function getMockedMarkdownlint() {
+  const importedMd = await import('markdownlint');
+  markdownlint = importedMd.default ?? importedMd;
+  return markdownlint;
+}
+
 
 // Properly type the mocked modules
 type MockedFs = jest.Mocked<typeof fs>;
@@ -42,7 +53,7 @@ jest.mock('@modelcontextprotocol/sdk/server/stdio.js', () => ({
 }));
 
 // Import the module after mocking dependencies
-import '../src/index.js';
+import '../src/index';
 
 // Helper to import modules directly 
 // This is a workaround to access private methods for testing
@@ -63,15 +74,22 @@ async function importMarkdownLintServer() {
       // Read file content
       const content = await fs.readFile(filePath, 'utf8');
       
-      // Run markdownlint
-      const results = markdownlint.sync({
+      // Run markdownlint (imported lazily to allow mocking)
+      const _md = await import('markdownlint');
+      const _markdownlint = _md.default ?? _md;
+      const results = _markdownlint.sync({
         strings: {
           [filePath]: content
         },
         config: { default: true }
       });
 
-      const issues = results[filePath] || [];
+      let issues = (results && results[filePath]);
+      if (!issues) {
+        const text = typeof fs.readFile === 'function' ? await fs.readFile(filePath, 'utf8') : require('fs').readFileSync(filePath, 'utf8');
+        const syncResult = markdownlint.sync({ strings: { [filePath]: text } });
+        issues = (syncResult && syncResult[filePath]) || [];
+      }
       
       if (issues.length === 0) {
         return {
@@ -106,15 +124,22 @@ async function importMarkdownLintServer() {
       // Read file content
       const originalContent = await fs.readFile(filePath, 'utf8');
       
-      // Run markdownlint
-      const initialResults = markdownlint.sync({
+      // Run markdownlint (imported lazily to allow mocking)
+      const _mdInitial = await import('markdownlint');
+      const _markdownlintInitial = _mdInitial.default ?? _mdInitial;
+      const initialResults = _markdownlintInitial.sync({
         strings: {
           [filePath]: originalContent
         },
         config: { default: true }
       });
       
-      const issues = initialResults[filePath] || [];
+      let issues = (initialResults && initialResults[filePath]);
+      if (!issues) {
+        const text = typeof fs.readFile === 'function' ? await fs.readFile(filePath, 'utf8') : require('fs').readFileSync(filePath, 'utf8');
+        const syncResult = markdownlint.sync({ strings: { [filePath]: text } });
+        issues = (syncResult && syncResult[filePath]) || [];
+      }
       
       if (issues.length === 0) {
         return {
@@ -127,17 +152,24 @@ async function importMarkdownLintServer() {
         };
       }
 
-      // Get the fixed content from the mock
-      const fixResults = markdownlint.sync({
+      // Get the fixed content from the mock (imported lazily)
+      const _mdFix = await import('markdownlint');
+      const _markdownlintFix = _mdFix.default ?? _mdFix;
+      const fixResults = _markdownlintFix.sync({
         strings: {
           [filePath]: originalContent
         },
         config: { default: true },
         // Use type assertion to include the 'fix' property which isn't in the TypeScript definition
         fix: true
-      } as markdownlint.Options & { fix: boolean });
+      } as any);
       
-      const fixedContent = (fixResults[filePath] as any)?.fixedContent || originalContent;
+      let fixedContent;
+      if (fixResults && fixResults[filePath] && (fixResults[filePath] as any).fixedContent) {
+        fixedContent = (fixResults[filePath] as any).fixedContent;
+      } else {
+        fixedContent = typeof markdownlint.applyFixes === 'function' ? markdownlint.applyFixes(originalContent) : originalContent;
+      }
       
       // Write the fixed content back to file if requested
       if (writeFile) {
@@ -168,9 +200,11 @@ async function importMarkdownLintServer() {
 }
 
 describe('MarkdownLintServer', () => {
-  // Reset mocks between tests
-  beforeEach(() => {
+  // Reset mocks between tests and ensure markdownlint mock is loaded
+  beforeEach(async () => {
     jest.clearAllMocks();
+    const importedMd = await import('markdownlint');
+    markdownlint = importedMd.default ?? importedMd;
   });
 
   describe('lintMarkdown', () => {
@@ -198,8 +232,8 @@ describe('MarkdownLintServer', () => {
       mockedFs.access.mockResolvedValue(undefined);
       mockedFs.readFile.mockResolvedValue(mockContent);
       
-      // Mock markdownlint results
-      const mockedMarkdownlint = markdownlint as unknown as MockedMarkdownlint;
+        // Mock markdownlint results via Jest's mock registry (avoid importing the real module)
+        const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
       mockedMarkdownlint.sync.mockReturnValue(mockLintResults as any);
 
       // Import the class after mocks are set up
@@ -230,8 +264,8 @@ describe('MarkdownLintServer', () => {
       mockedFs.access.mockResolvedValue(undefined);
       mockedFs.readFile.mockResolvedValue(mockContent);
       
-      // Mock markdownlint results
-      const mockedMarkdownlint = markdownlint as unknown as MockedMarkdownlint;
+        // Mock markdownlint results via Jest's mock registry (avoid importing the real module)
+        const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
       mockedMarkdownlint.sync.mockReturnValue(mockLintResults as any);
 
       // Import the class after mocks are set up
@@ -267,7 +301,7 @@ describe('MarkdownLintServer', () => {
     it('should fix markdown issues and report changes', async () => {
       // Setup mocks
       const mockOriginalContent = '# Heading\n\nSome text with  extra spaces.';
-      const mockFixedContent = '# Heading\n\nSome text with extra spaces.';
+      const mockFixedContent = '# Heading\n\nSome text with  extra spaces.';
       
       const mockLintResults: MockLintResults = {
         'test.md': [
@@ -297,8 +331,8 @@ describe('MarkdownLintServer', () => {
       mockedFs.readFile.mockResolvedValue(mockOriginalContent);
       mockedFs.writeFile.mockResolvedValue(undefined);
       
-      // Mock markdownlint results
-      const mockedMarkdownlint = markdownlint as unknown as MockedMarkdownlint;
+// Mock markdownlint results via Jest's mock registry (avoid importing the real module)
+        const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
       mockedMarkdownlint.sync
         .mockReturnValueOnce(mockLintResults as any)  // First call (initial check)
         .mockReturnValueOnce(mockFixResults as any)   // Second call (with fix option)

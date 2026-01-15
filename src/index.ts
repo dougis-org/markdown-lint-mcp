@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { createServer } from './server.js';
-import logger, { LogLevel } from './utils/logger.js';
+import { createServer } from './server';
+import logger, { LogLevel } from './utils/logger';
 
 /**
  * Main entry point for the markdownlint-mcp server

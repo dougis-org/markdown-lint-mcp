@@ -1,5 +1,5 @@
 {
-  "name": "markdown-lint-mcp",
+  "name": "@dougis/markdown-lint-mcp",
   "version": "1.0.0",
   "description": "Model Context Protocol server for markdown linting and formatting, forked from ernestgwilsonii/markdownlint-mcp",
   "main": "dist/index.js",
@@ -75,6 +75,9 @@
     "jest": "^30.2.0",
     "prettier": "^3.7.0",
     "ts-jest": "^29.4.0",
+    "babel-jest": "^30.2.0",
+    "@babel/core": "^7.22.0",
+    "@babel/preset-env": "^7.22.0",
     "typescript": "^5.9.0"
   }
 }
