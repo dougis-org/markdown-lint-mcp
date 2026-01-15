@@ -181,14 +181,24 @@ export class MarkdownLintServer {
       });
 
       const lintResults = (results[filePath] || []) as import('markdownlint').LintResult[];
-      const issues: MarkdownlintIssue[] = lintResults.map(r => ({
-        lineNumber: r.lineNumber,
-        ruleNames: r.ruleNames,
-        ruleDescription:
-          r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
-        errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
-        fixInfo: (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo,
-      }));
+      const issues: MarkdownlintIssue[] = lintResults.map(r => {
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as any;
+        const fixInfo = rawFix && typeof rawFix === 'object'
+          ? {
+              editColumn: typeof rawFix.editColumn === 'number' ? rawFix.editColumn : undefined,
+              deleteCount: typeof rawFix.deleteCount === 'number' ? rawFix.deleteCount : undefined,
+              insertText: typeof rawFix.insertText === 'string' ? rawFix.insertText : undefined,
+            }
+          : undefined;
+
+        return {
+          lineNumber: r.lineNumber,
+          ruleNames: r.ruleNames,
+          ruleDescription: r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
+          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+          fixInfo,
+        };
+      });
       logger.info(`Found ${issues.length} issues in ${filePath}`);
 
       if (issues.length === 0) {
@@ -261,13 +271,24 @@ export class MarkdownLintServer {
         config,
       });
       const initialLintResults = (initialResults[filePath] || []) as import('markdownlint').LintResult[];
-        const initialIssues: MarkdownlintIssue[] = initialLintResults.map(r => ({
-          lineNumber: r.lineNumber,
-          ruleNames: r.ruleNames,
-          ruleDescription: r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
-          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
-          fixInfo: (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo,
-        }));;
+        const initialIssues: MarkdownlintIssue[] = initialLintResults.map(r => {
+          const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as any;
+          const fixInfo = rawFix && typeof rawFix === 'object'
+            ? {
+                editColumn: typeof rawFix.editColumn === 'number' ? rawFix.editColumn : undefined,
+                deleteCount: typeof rawFix.deleteCount === 'number' ? rawFix.deleteCount : undefined,
+                insertText: typeof rawFix.insertText === 'string' ? rawFix.insertText : undefined,
+              }
+            : undefined;
+
+          return {
+            lineNumber: r.lineNumber,
+            ruleNames: r.ruleNames,
+            ruleDescription: r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
+            errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+            fixInfo,
+          };
+        });;
       logger.info(`Initial issues count: ${initialIssues.length}`);
 
       // Split content into lines
@@ -348,13 +369,24 @@ export class MarkdownLintServer {
         config,
       });
       const finalLintResults = (finalResults[filePath] || []) as import('markdownlint').LintResult[];
-      const finalIssues: MarkdownlintIssue[] = finalLintResults.map(r => ({
-        lineNumber: r.lineNumber,
-        ruleNames: r.ruleNames,
-        ruleDescription: (r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule'),
-        errorDetail: (r as any).errorDetail,
-        fixInfo: (r as any).fixInfo,
-      }));
+      const finalIssues: MarkdownlintIssue[] = finalLintResults.map(r => {
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as any;
+        const fixInfo = rawFix && typeof rawFix === 'object'
+          ? {
+              editColumn: typeof rawFix.editColumn === 'number' ? rawFix.editColumn : undefined,
+              deleteCount: typeof rawFix.deleteCount === 'number' ? rawFix.deleteCount : undefined,
+              insertText: typeof rawFix.insertText === 'string' ? rawFix.insertText : undefined,
+            }
+          : undefined;
+
+        return {
+          lineNumber: r.lineNumber,
+          ruleNames: r.ruleNames,
+          ruleDescription: (r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule'),
+          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+          fixInfo,
+        };
+      });
       logger.info(`Final issues count: ${finalIssues.length}`);
 
       // Generate status report
