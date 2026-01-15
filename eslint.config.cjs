@@ -2,11 +2,17 @@ module.exports = [
   {
     files: ['**/*.ts'],
     languageOptions: {
-      ecmaVersion: 2022,
-      sourceType: 'module'
+      parser: require.resolve('@typescript-eslint/parser'),
+      parserOptions: {
+        ecmaVersion: 2022,
+        sourceType: 'module'
+      }
     },
-    parser: '@typescript-eslint/parser',
-    plugins: ['@typescript-eslint', 'jest', 'prettier'],
+    plugins: {
+      '@typescript-eslint': require('@typescript-eslint/eslint-plugin'),
+      jest: require('eslint-plugin-jest'),
+      prettier: require('eslint-plugin-prettier')
+    },
     env: {
       node: true,
       es6: true,
