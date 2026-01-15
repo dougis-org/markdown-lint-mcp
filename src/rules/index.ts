@@ -2,7 +2,7 @@
  * Exports all rule implementations
  */
 
-import { Rule, RuleMap } from './rule-interface';
+import { RuleMap } from './rule-interface';
 
 // Import implemented rules
 import md001 from './md001';
@@ -139,7 +139,7 @@ export function getImplementedRules(): string[] {
 export function applyRuleFixes(lines: string[], ruleNames: string[]): string[] {
   // Create a copy of the lines array to avoid modifying the original
   let fixedLines = [...lines];
-  
+
   // Apply each rule fix in sequence, but only if the rule is implemented
   for (const ruleName of ruleNames) {
     const rule = rules[ruleName as keyof typeof rules];
@@ -147,6 +147,6 @@ export function applyRuleFixes(lines: string[], ruleNames: string[]): string[] {
       fixedLines = rule.fix(fixedLines);
     }
   }
-  
+
   return fixedLines;
 }

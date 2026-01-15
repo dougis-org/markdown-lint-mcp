@@ -2,11 +2,11 @@ import { Rule, RuleViolation } from './rule-interface';
 
 /**
  * MD043: Required heading structure
- * 
+ *
  * This rule is triggered when the headings in a file don't match the array of headings
  * specified in the rule's configuration. It can be used to enforce a standard
  * heading structure across a set of documents.
- * 
+ *
  * Note: This rule is detection-only and doesn't provide automatic fixes
  * since fixing would require generating appropriate content for potentially
  * missing headings.
@@ -42,56 +42,59 @@ function getHeadingLevel(line: string): number {
  * @param config Optional rule configuration with expected headings
  * @returns Array of rule violations
  */
-export function validate(lines: string[], config?: any): RuleViolation[] {
+export function validate(lines: string[], _config?: any): RuleViolation[] {
   const violations: RuleViolation[] = [];
-  
+
   // Default configuration - if no headings specified, no violations
   const expectedHeadings = config?.headings || [];
-  
+
   // If no expected headings configured, skip validation
   if (expectedHeadings.length === 0) {
     return violations;
   }
-  
+
   // Extract all headings from the document
-  const documentHeadings: Array<{text: string, level: number, lineNumber: number}> = [];
-  
+  const documentHeadings: Array<{ text: string; level: number; lineNumber: number }> = [];
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line.trim();
-    
+
     // Check if this line is a heading
     if (trimmed.match(/^#{1,6}(\s|$)/)) {
       const headingText = extractHeadingText(line);
       const level = getHeadingLevel(line);
-      
+
       // Include all headings, even empty ones
       documentHeadings.push({
         text: headingText,
         level: level,
-        lineNumber: i + 1
+        lineNumber: i + 1,
       });
     }
   }
-  
+
   // Compare document headings with expected structure
   for (let i = 0; i < Math.max(documentHeadings.length, expectedHeadings.length); i++) {
     const documentHeading = documentHeadings[i];
     const expectedHeading = expectedHeadings[i];
-    
+
     if (!documentHeading && expectedHeading) {
       // Missing expected heading
       violations.push({
-        lineNumber: documentHeadings.length > 0 ? documentHeadings[documentHeadings.length - 1].lineNumber : 1,
+        lineNumber:
+          documentHeadings.length > 0
+            ? documentHeadings[documentHeadings.length - 1].lineNumber
+            : 1,
         details: `Missing expected heading: "${expectedHeading}"`,
-        range: [0, 0]
+        range: [0, 0],
       });
     } else if (documentHeading && !expectedHeading) {
       // Extra heading not in expected structure
       violations.push({
         lineNumber: documentHeading.lineNumber,
         details: `Unexpected heading: "${documentHeading.text}"`,
-        range: [0, lines[documentHeading.lineNumber - 1].length]
+        range: [0, lines[documentHeading.lineNumber - 1].length],
       });
     } else if (documentHeading && expectedHeading) {
       // Check if heading text matches expected
@@ -99,12 +102,12 @@ export function validate(lines: string[], config?: any): RuleViolation[] {
         violations.push({
           lineNumber: documentHeading.lineNumber,
           details: `Expected heading "${expectedHeading}" but found "${documentHeading.text}"`,
-          range: [0, lines[documentHeading.lineNumber - 1].length]
+          range: [0, lines[documentHeading.lineNumber - 1].length],
         });
       }
     }
   }
-  
+
   return violations;
 }
 
@@ -128,7 +131,7 @@ export const rule: Rule = {
   name,
   description,
   validate,
-  fix
+  fix,
 };
 
 export default rule;

@@ -2,10 +2,10 @@ import { Rule } from './rule-interface';
 
 /**
  * MD013: Line length
- * 
+ *
  * This rule is triggered when lines are longer than the configured line length.
  * This rule is good for readability and maintaining a consistent code style.
- * 
+ *
  * Note: This rule is detection-only and doesn't provide automatic fixes
  * since line length remediation often requires human judgment for proper formatting.
  */
@@ -30,7 +30,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

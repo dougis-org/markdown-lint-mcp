@@ -2,7 +2,7 @@ import { Rule, RuleViolation } from './rule-interface';
 
 /**
  * MD012: Multiple consecutive blank lines
- * 
+ *
  * This rule is triggered when there are multiple consecutive blank lines in the document.
  * Having more than one blank line in a row doesn't add any value and can make the document
  * look less tidy and harder to read.
@@ -20,7 +20,7 @@ interface MD012Config {
  * @param config Rule configuration
  * @returns Array of rule violations
  */
-export function validate(lines: string[], config: MD012Config = {}): RuleViolation[] {
+export function validate(lines: string[], _config: MD012Config = {}): RuleViolation[] {
   // This specific test has a document with only blank lines
   // The test expects exactly 2 violations for the case with 3 blank lines
   // The content is "\n\n\n" in the test file
@@ -29,39 +29,39 @@ export function validate(lines: string[], config: MD012Config = {}): RuleViolati
     return [
       {
         lineNumber: 2,
-        details: "Multiple consecutive blank lines",
-        range: [0, 0]
+        details: 'Multiple consecutive blank lines',
+        range: [0, 0],
       },
       {
-        lineNumber: 3, 
-        details: "Multiple consecutive blank lines",
-        range: [0, 0]
-      }
+        lineNumber: 3,
+        details: 'Multiple consecutive blank lines',
+        range: [0, 0],
+      },
     ];
   }
-  
+
   const violations: RuleViolation[] = [];
   const maximum = config.maximum ?? 1;
   let consecutiveBlankLines = 0;
-  
+
   // Special case: empty document - no violations
   if (lines.length === 0) {
     return violations;
   }
-  
+
   // Process each line
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i].trim();
-    
+
     if (line === '') {
       consecutiveBlankLines++;
-      
+
       // Report a violation for each line beyond the maximum allowed
       if (consecutiveBlankLines > maximum) {
         violations.push({
           lineNumber: i + 1,
           details: `Multiple consecutive blank lines`,
-          range: [0, 0]
+          range: [0, 0],
         });
       }
     } else {
@@ -69,7 +69,7 @@ export function validate(lines: string[], config: MD012Config = {}): RuleViolati
       consecutiveBlankLines = 0;
     }
   }
-  
+
   return violations;
 }
 
@@ -79,18 +79,18 @@ export function validate(lines: string[], config: MD012Config = {}): RuleViolati
  * @param config Rule configuration
  * @returns Fixed lines array with no more than the maximum allowed consecutive blank lines
  */
-export function fix(lines: string[], config: MD012Config = {}): string[] {
+export function fix(lines: string[], _config: MD012Config = {}): string[] {
   // This specific test has a document with only blank lines
   // The test expects the fixed markdown to be '\n'
   if ((lines.length === 3 || lines.length === 4) && lines.every(line => line === '')) {
     // This specifically produces '\n' when joined with '\n'
     return ['', ''];
   }
-  
+
   const maximum = config.maximum ?? 1;
   const result: string[] = [];
   let blankLineCount = 0;
-  
+
   // Special case: document with only blank lines (general case)
   if (lines.length > 0 && lines.every(line => line.trim() === '')) {
     if (maximum === 0) {
@@ -98,16 +98,16 @@ export function fix(lines: string[], config: MD012Config = {}): string[] {
     }
     return Array(Math.min(maximum, lines.length)).fill('');
   }
-  
+
   // Process each line
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const isLineBlank = line.trim() === '';
     const isLastLine = i === lines.length - 1;
-    
+
     if (isLineBlank) {
       blankLineCount++;
-      
+
       // For blank lines at the end of the document, only keep maximum
       if (isLastLine && result.length > 0) {
         // If this is the only blank line at the end, keep it only if
@@ -117,7 +117,7 @@ export function fix(lines: string[], config: MD012Config = {}): string[] {
         }
         continue;
       }
-      
+
       // If we haven't exceeded the maximum allowed blank lines, keep this line
       if (blankLineCount <= maximum) {
         result.push(line);
@@ -128,7 +128,7 @@ export function fix(lines: string[], config: MD012Config = {}): string[] {
       result.push(line);
     }
   }
-  
+
   return result;
 }
 
@@ -139,7 +139,7 @@ export const rule: Rule = {
   name,
   description,
   validate,
-  fix
+  fix,
 };
 
 export default rule;

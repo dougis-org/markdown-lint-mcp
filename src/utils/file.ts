@@ -10,10 +10,10 @@ import { MarkdownlintConfig } from '../types.js';
  * Used when no custom configuration is found
  */
 const DEFAULT_CONFIG: MarkdownlintConfig = {
-  'default': true,
-  'MD013': { 'line_length': 120 }, // Allow longer lines for modern displays
-  'MD033': false, // Allow HTML
-  'MD041': false, // Allow files to not start with H1
+  default: true,
+  MD013: { line_length: 120 }, // Allow longer lines for modern displays
+  MD033: false, // Allow HTML
+  MD041: false, // Allow files to not start with H1
 };
 
 /**
@@ -27,11 +27,11 @@ export async function readFile(filePath: string): Promise<string> {
     // Check if file exists first
     await fs.access(filePath);
     return await fs.readFile(filePath, 'utf8');
-  } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+  } catch (err: any) {
+    if (err && typeof err === 'object' && 'code' in err && (err as any).code === 'ENOENT') {
       throw new Error(`File not found: ${filePath}`);
     }
-    throw error;
+    throw err;
   }
 }
 
@@ -52,12 +52,12 @@ export async function writeFile(filePath: string, content: string): Promise<void
  */
 export async function loadConfiguration(directory: string): Promise<MarkdownlintConfig> {
   const configPath = path.join(directory, '.markdownlint.json');
-  
+
   try {
     await fs.access(configPath);
     const configContent = await fs.readFile(configPath, 'utf8');
     return JSON.parse(configContent) as MarkdownlintConfig;
-  } catch (error) {
+  } catch {
     // Fall back to default configuration if file not found or invalid
     return { ...DEFAULT_CONFIG };
   }

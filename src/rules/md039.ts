@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD039: Spaces inside link text
- * 
+ *
  * This rule is triggered when there are spaces inside the square brackets
  * of a link text or image alt text. For example, [ text ](url) should be [text](url).
  */
@@ -19,11 +19,11 @@ export function fix(lines: string[]): string[] {
     // Fix spaces inside link text
     // Matches [ text ](url) and replaces with [text](url)
     let fixedLine = line.replace(/\[\s+([^\]]+?)\s+\]\(([^)]+)\)/g, '[$1]($2)');
-    
+
     // Fix spaces inside image alt text
     // Matches ![ alt text ](url) and replaces with ![alt text](url)
     fixedLine = fixedLine.replace(/!\[\s+([^\]]+?)\s+\]\(([^)]+)\)/g, '![$1]($2)');
-    
+
     return fixedLine;
   });
 }
@@ -34,7 +34,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

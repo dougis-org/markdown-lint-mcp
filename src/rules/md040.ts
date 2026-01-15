@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD040: Fenced code blocks should have a language specified
- * 
+ *
  * This rule is triggered when fenced code blocks do not have a language specified.
  * Adding a language helps syntax highlighting and improves readability.
  */
@@ -17,10 +17,10 @@ export const description = 'Fenced code blocks should have a language specified'
 export function fix(lines: string[]): string[] {
   let fixedLines: string[] = [];
   let inCodeBlock = false;
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     if (!inCodeBlock && line.trim() === '```') {
       // Add 'text' as the default language
       fixedLines.push('```text');
@@ -35,7 +35,7 @@ export function fix(lines: string[]): string[] {
       }
     }
   }
-  
+
   return fixedLines;
 }
 
@@ -45,7 +45,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

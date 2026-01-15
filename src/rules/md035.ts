@@ -2,10 +2,10 @@ import { Rule } from './rule-interface';
 
 /**
  * MD035: Horizontal rule style
- * 
+ *
  * This rule enforces consistent horizontal rule (thematic break) style.
  * In markdown, horizontal rules can be created using three or more hyphens (-),
- * asterisks (*), or underscores (_). This rule ensures that horizontal rules 
+ * asterisks (*), or underscores (_). This rule ensures that horizontal rules
  * use a consistent style throughout a document.
  */
 export const name = 'MD035';
@@ -25,7 +25,7 @@ const hrLineRegex = /^\s*([-*_])(\s*\1\s*){2,}\s*$/;
 export function fix(lines: string[]): string[] {
   // Find the first horizontal rule to use as the preferred style
   let preferredStyle = '---'; // Default to three hyphens if no horizontal rule is found
-  
+
   for (const line of lines) {
     const match = line.match(hrLineRegex);
     if (match) {
@@ -34,7 +34,7 @@ export function fix(lines: string[]): string[] {
       break;
     }
   }
-  
+
   // Now fix all horizontal rules to match the preferred style
   return lines.map(line => {
     const match = line.match(hrLineRegex);
@@ -53,7 +53,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

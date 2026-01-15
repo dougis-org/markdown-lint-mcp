@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD042: No empty links
- * 
+ *
  * This rule is triggered when links have empty URLs or text. These empty links
  * don't point to anything and should be removed or filled in with proper content.
  * Empty links in markdown take the form of [] or [text]() or [](url).
@@ -31,19 +31,19 @@ export function fix(lines: string[]): string[] {
     if (!hasEmptyLinks(line)) {
       return line;
     }
-    
+
     // Replace links with empty text and URL: []()
     let fixedLine = line.replace(/\[\]\(\)/g, '');
-    
+
     // Replace links with empty text but with URL: [](url)
     fixedLine = fixedLine.replace(/\[\]\(([^)]+)\)/g, '$1');
-    
+
     // Replace links with text but empty URL: [text]()
     fixedLine = fixedLine.replace(/\[([^\]]+)\]\(\)/g, '$1');
-    
+
     // Replace completely empty links: []
     fixedLine = fixedLine.replace(/\[\]/g, '');
-    
+
     return fixedLine;
   });
 }
@@ -54,7 +54,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

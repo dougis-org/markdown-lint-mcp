@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD045: Images should have alternate text (alt text)
- * 
+ *
  * This rule is triggered when an image is missing alternate text (alt text).
  * Alternate text is important for accessibility and should always be provided
  * for images.
@@ -27,33 +27,33 @@ export function fix(lines: string[]): string[] {
     let result = line;
     let match;
     let offset = 0;
-    
+
     // Reset the regex lastIndex
     imageRegex.lastIndex = 0;
-    
+
     // Process each image reference in the line
     while ((match = imageRegex.exec(line)) !== null) {
-      const [fullMatch, altText, inlineUrl, referenceId] = match;
-      
+      const [fullMatch, altText] = match;
+
       // If the alt text is empty, add an empty pair of brackets
       if (!altText || altText.trim() === '') {
         const newText = fullMatch.replace('![]', '![ ]');
-        
+
         // Replace at the correct position with the offset applied
         const startPos = match.index + offset;
         const endPos = startPos + fullMatch.length;
-        
+
         // Update the result string
         result = result.substring(0, startPos) + newText + result.substring(endPos);
-        
+
         // Update the offset for subsequent replacements
         offset += newText.length - fullMatch.length;
-        
+
         // Update the lastIndex to account for the change in string length
         imageRegex.lastIndex += newText.length - fullMatch.length;
       }
     }
-    
+
     return result;
   });
 }
@@ -64,7 +64,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

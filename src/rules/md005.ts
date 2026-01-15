@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD005: Inconsistent indentation for list items at the same level
- * 
+ *
  * This rule is triggered when list items at the same level have different indentation.
  * List items should be consistently indented for readability.
  */
@@ -20,19 +20,19 @@ export function fix(lines: string[]): string[] {
   const levelToSpaces: { [level: number]: number } = {};
   // Track current list level - increments on nested lists, decrements when nesting ends
   let currentLevel = 0;
-  
+
   // First pass: detect the correct indentation for each level
   lines.forEach(line => {
     const match = line.match(listItemRegex);
     if (!match) return;
-    
+
     const indentation = match[1].length;
-    
+
     // If this is the first item at this level or has less indentation than what we've seen
     if (!(currentLevel in levelToSpaces) || indentation < levelToSpaces[currentLevel]) {
       levelToSpaces[currentLevel] = indentation;
     }
-    
+
     // Check for new list level by looking at indentation
     if (currentLevel === 0 || indentation > levelToSpaces[currentLevel - 1]) {
       currentLevel++;
@@ -47,10 +47,10 @@ export function fix(lines: string[]): string[] {
       }
     }
   });
-  
+
   // Reset for second pass
   currentLevel = 0;
-  
+
   // Second pass: fix inconsistent indentation
   return lines.map(line => {
     const match = line.match(listItemRegex);
@@ -62,11 +62,11 @@ export function fix(lines: string[]): string[] {
       }
       return line;
     }
-    
+
     const indentation = match[1].length;
     const marker = match[2];
     const content = match[3];
-    
+
     // Update current level based on indentation
     if (currentLevel === 0 || indentation > levelToSpaces[currentLevel - 1]) {
       currentLevel++;
@@ -78,10 +78,10 @@ export function fix(lines: string[]): string[] {
         currentLevel++;
       }
     }
-    
+
     // Calculate correct indentation for this level
     const correctIndentation = ' '.repeat(levelToSpaces[currentLevel - 1] || 0);
-    
+
     // Return fixed line with correct indentation
     return `${correctIndentation}${marker} ${content}`;
   });
@@ -93,7 +93,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

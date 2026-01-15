@@ -10,7 +10,7 @@ export enum LogLevel {
   INFO = 1,
   WARN = 2,
   ERROR = 3,
-  NONE = 4
+  NONE = 4,
 }
 
 /**
@@ -88,5 +88,5 @@ export default {
   info,
   warn,
   error,
-  LogLevel
+  LogLevel,
 };

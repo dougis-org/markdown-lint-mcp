@@ -83,8 +83,8 @@ export interface MarkdownlintConfig {
  * Used when no custom configuration is provided
  */
 export const DEFAULT_CONFIG: MarkdownlintConfig = {
-  'default': true,
-  'MD013': { 'line_length': 120 }, // Allow longer lines for modern displays
-  'MD033': false, // Allow HTML
-  'MD041': false, // Allow files to not start with H1
+  default: true,
+  MD013: { line_length: 120 }, // Allow longer lines for modern displays
+  MD033: false, // Allow HTML
+  MD041: false, // Allow files to not start with H1
 };

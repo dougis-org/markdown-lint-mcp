@@ -2,11 +2,11 @@ import { Rule } from './rule-interface';
 
 /**
  * MD033: Inline HTML
- * 
+ *
  * This rule is triggered when HTML tags are used in a Markdown document.
  * Some users prefer to use "pure" Markdown without HTML tags, as it improves
  * portability and prevents potential security issues when rendering the Markdown.
- * 
+ *
  * Note: This rule is detection-only and doesn't provide automatic fixes
  * since removing HTML would likely break intended functionality.
  */
@@ -32,7 +32,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

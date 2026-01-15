@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD018: No space after hash on atx style heading
- * 
+ *
  * This rule is triggered when there is no space after the hash characters
  * that open an atx style heading. This rule is consistent with the standard
  * CommonMark specification.
@@ -16,9 +16,7 @@ export const description = 'No space after hash on atx style heading';
  * @returns Fixed lines array with proper spacing after heading hashes
  */
 export function fix(lines: string[]): string[] {
-  return lines.map(line => 
-    line.replace(/^(#{1,6})([^#\s])/, '$1 $2')
-  );
+  return lines.map(line => line.replace(/^(#{1,6})([^#\s])/, '$1 $2'));
 }
 
 /**
@@ -27,7 +25,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

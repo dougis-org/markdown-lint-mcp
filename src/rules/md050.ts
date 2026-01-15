@@ -2,8 +2,8 @@ import { Rule } from './rule-interface';
 
 /**
  * MD050: Strong style
- * 
- * This rule is triggered when the style used for strong emphasis (bold) 
+ *
+ * This rule is triggered when the style used for strong emphasis (bold)
  * is inconsistent. By default, this rule enforces double asterisks (**) for strong emphasis,
  * but it can be configured to enforce double underscores (__) instead.
  */
@@ -20,7 +20,7 @@ export function fix(lines: string[]): string[] {
     // Convert double underscore strong emphasis to double asterisk
     // Replace __ with ** for strong emphasis
     const fixedLine = line.replace(/__([^_]+?)__/g, '**$1**');
-    
+
     return fixedLine;
   });
 }
@@ -31,7 +31,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

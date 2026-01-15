@@ -31,7 +31,7 @@ function main() {
 
   // Create and start the server
   const server = createServer();
-  
+
   // Start the server and handle any startup errors
   server.run().catch(error => {
     logger.error('Failed to start markdownlint MCP server', error);
