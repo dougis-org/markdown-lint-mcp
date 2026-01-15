@@ -46,7 +46,7 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
   const violations: RuleViolation[] = [];
 
   // Default configuration - if no headings specified, no violations
-  const expectedHeadings = config?.headings || [];
+  const expectedHeadings = _config?.headings || [];
 
   // If no expected headings configured, skip validation
   if (expectedHeadings.length === 0) {

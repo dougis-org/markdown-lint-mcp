@@ -41,7 +41,7 @@ export function validate(lines: string[], _config: MD012Config = {}): RuleViolat
   }
 
   const violations: RuleViolation[] = [];
-  const maximum = config.maximum ?? 1;
+  const maximum = _config.maximum ?? 1;
   let consecutiveBlankLines = 0;
 
   // Special case: empty document - no violations
@@ -87,7 +87,7 @@ export function fix(lines: string[], _config: MD012Config = {}): string[] {
     return ['', ''];
   }
 
-  const maximum = config.maximum ?? 1;
+  const maximum = _config.maximum ?? 1;
   const result: string[] = [];
   let blankLineCount = 0;
 

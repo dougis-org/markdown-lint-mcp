@@ -80,7 +80,6 @@ export function fix(lines: string[]): string[] {
       // If we're not already in a table, this is the start of a new table
       if (!inTable) {
         inTable = true;
-        tableStartIndex = i;
         columnCount = countTableColumns(line);
       }
 

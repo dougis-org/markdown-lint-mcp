@@ -24,7 +24,7 @@ interface MD010Config {
 export function validate(lines: string[], _config: MD010Config = {}): RuleViolation[] {
   const violations: RuleViolation[] = [];
   // Default configuration: check code blocks and convert tabs to 2 spaces
-  const checkCodeBlocks = config.code_blocks !== false;
+  const checkCodeBlocks = _config.code_blocks !== false;
 
   let inCodeBlock = false;
 
@@ -62,8 +62,8 @@ export function validate(lines: string[], _config: MD010Config = {}): RuleViolat
  */
 export function fix(lines: string[], _config: MD010Config = {}): string[] {
   // Default to 2 spaces per tab if not specified
-  const spacesPerTab = config.spaces_per_tab || 2;
-  const checkCodeBlocks = config.code_blocks !== false;
+  const spacesPerTab = _config.spaces_per_tab || 2;
+  const checkCodeBlocks = _config.code_blocks !== false;
 
   let inCodeBlock = false;
 

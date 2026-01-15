@@ -71,8 +71,8 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
   const violations: RuleViolation[] = [];
 
   // Get proper names from configuration
-  const properNames = config?.names || [];
-  const ignoreCodeBlocks = config?.code_blocks !== false; // Default to true (ignore code blocks)
+  const properNames = _config?.names || [];
+  const ignoreCodeBlocks = _config?.code_blocks !== false; // Default to true (ignore code blocks)
 
   // If no proper names configured, no violations
   if (properNames.length === 0) {
@@ -163,8 +163,8 @@ export function fix(lines: string[], _config?: any): string[] {
   const fixedLines = [...lines];
 
   // Get proper names from configuration
-  const properNames = config?.names || [];
-  const ignoreCodeBlocks = config?.code_blocks !== false; // Default to true (ignore code blocks)
+  const properNames = _config?.names || [];
+  const ignoreCodeBlocks = _config?.code_blocks !== false; // Default to true (ignore code blocks)
 
   // If no proper names configured, return unchanged
   if (properNames.length === 0) {

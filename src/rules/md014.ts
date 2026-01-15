@@ -31,7 +31,6 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
       if (!inCodeBlock) {
         // Start of code block
         inCodeBlock = true;
-        codeBlockStart = i;
         codeBlockLines = [];
         // Extract the language if specified
         codeBlockLanguage = line.trim().substring(3).trim().toLowerCase();

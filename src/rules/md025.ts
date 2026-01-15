@@ -43,10 +43,8 @@ export function fix(lines: string[], _config?: MD025Config): string[] {
 
   // Check if front matter has a title
   if (lines.length > 0 && lines[0] === '---') {
-    inFrontMatter = true;
     for (let i = 1; i < lines.length; i++) {
       if (lines[i] === '---' || lines[i] === '...') {
-        inFrontMatter = false;
         break;
       }
 

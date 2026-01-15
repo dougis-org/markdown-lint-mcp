@@ -135,7 +135,7 @@ function findEmphasisMarkers(
  */
 export function validate(lines: string[], _config?: any): RuleViolation[] {
   const violations: RuleViolation[] = [];
-  const style = config?.style || 'asterisk'; // Default to asterisk
+  const style = _config?.style || 'asterisk'; // Default to asterisk
 
   // Track what styles we've seen
   const stylesFound = new Set<string>();
@@ -181,7 +181,7 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
  * @returns Fixed lines array with consistent emphasis style
  */
 export function fix(lines: string[], _config?: any): string[] {
-  const style = config?.style || 'asterisk'; // Default to asterisk
+  const style = _config?.style || 'asterisk'; // Default to asterisk
 
   return lines.map((line, index) => {
     // Skip code blocks
