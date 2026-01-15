@@ -67,7 +67,12 @@ function isInCodeBlock(lines: string[], lineIndex: number): boolean {
  * @param config Optional rule configuration with proper names
  * @returns Array of rule violations
  */
-export function validate(lines: string[], _config?: any): RuleViolation[] {
+interface MD044Config {
+  names?: string[];
+  code_blocks?: boolean;
+}
+
+export function validate(lines: string[], _config?: MD044Config): RuleViolation[] {
   const violations: RuleViolation[] = [];
 
   // Get proper names from configuration
@@ -159,7 +164,7 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
  * @param config Optional rule configuration with proper names
  * @returns Fixed lines array with proper names correctly capitalized
  */
-export function fix(lines: string[], _config?: any): string[] {
+export function fix(lines: string[], _config?: MD044Config): string[] {
   const fixedLines = [...lines];
 
   // Get proper names from configuration

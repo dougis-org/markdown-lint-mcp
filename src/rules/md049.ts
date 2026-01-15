@@ -133,7 +133,11 @@ function findEmphasisMarkers(
  * @param config Optional rule configuration
  * @returns Array of rule violations
  */
-export function validate(lines: string[], _config?: any): RuleViolation[] {
+interface MD049Config {
+  style?: 'asterisk' | 'underscore';
+}
+
+export function validate(lines: string[], _config?: MD049Config): RuleViolation[] {
   const violations: RuleViolation[] = [];
   const style = _config?.style || 'asterisk'; // Default to asterisk
 
@@ -180,7 +184,7 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
  * @param config Optional rule configuration
  * @returns Fixed lines array with consistent emphasis style
  */
-export function fix(lines: string[], _config?: any): string[] {
+export function fix(lines: string[], _config?: MD049Config): string[] {
   const style = _config?.style || 'asterisk'; // Default to asterisk
 
   return lines.map((line, index) => {

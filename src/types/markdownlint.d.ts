@@ -6,21 +6,21 @@ declare module 'markdownlint' {
     resultVersion?: number;
     frontMatter?: string | null;
     fix?: boolean;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export interface LintResult {
     ruleNames: string[];
     lineNumber: number;
-    ruleInfo: { [key: string]: any };
+    ruleInfo: { [key: string]: unknown };
     errorRange?: [number, number];
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   export interface Markdownlint {
-    sync(options: Options): { [filename: string]: LintResult[] } | { [key: string]: any };
+    sync(options: Options): { [filename: string]: LintResult[] };
     promise?(options: Options): Promise<{ [filename: string]: LintResult[] }>;
-    [key: string]: any;
+    [key: string]: unknown;
   }
 
   const markdownlint: Markdownlint;

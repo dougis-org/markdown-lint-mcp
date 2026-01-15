@@ -9,6 +9,7 @@ import {
 // Lazy-load `markdownlint` inside methods to avoid ESM import issues during tests
 import path from 'path';
 import { MarkdownlintIssue, ToolArguments } from './types.js';
+import type { Markdownlint } from 'markdownlint';
 import { applyRuleFixes, getImplementedRules } from './rules/index';
 import {
   contentToLines,
@@ -170,7 +171,8 @@ export class MarkdownLintServer {
 
       // Run markdownlint (lazy import to avoid loading ESM into Jest process)
       const md = await import('markdownlint');
-      const markdownlintLocal: any = (md as any).default ?? md;
+      const markdownlintLocal =
+        (md as unknown as { default?: Markdownlint }).default ?? (md as unknown as Markdownlint);
       const results = markdownlintLocal.sync({
         strings: {
           [filePath]: content,
@@ -178,7 +180,15 @@ export class MarkdownLintServer {
         config,
       });
 
-      const issues = (results[filePath] || []) as MarkdownlintIssue[];
+      const lintResults = (results[filePath] || []) as import('markdownlint').LintResult[];
+      const issues: MarkdownlintIssue[] = lintResults.map(r => ({
+        lineNumber: r.lineNumber,
+        ruleNames: r.ruleNames,
+        ruleDescription:
+          r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
+        errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+        fixInfo: (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo,
+      }));
       logger.info(`Found ${issues.length} issues in ${filePath}`);
 
       if (issues.length === 0) {
@@ -241,14 +251,23 @@ export class MarkdownLintServer {
 
       // Get initial issues count (lazy import)
       const mdInit = await import('markdownlint');
-      const markdownlintInit: any = (mdInit as any).default ?? mdInit;
+      const markdownlintInit =
+        (mdInit as unknown as { default?: Markdownlint }).default ??
+        (mdInit as unknown as Markdownlint);
       const initialResults = markdownlintInit.sync({
         strings: {
           [filePath]: originalContent,
         },
         config,
       });
-      const initialIssues = (initialResults[filePath] || []) as MarkdownlintIssue[];
+      const initialLintResults = (initialResults[filePath] || []) as import('markdownlint').LintResult[];
+        const initialIssues: MarkdownlintIssue[] = initialLintResults.map(r => ({
+          lineNumber: r.lineNumber,
+          ruleNames: r.ruleNames,
+          ruleDescription: r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
+          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+          fixInfo: (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo,
+        }));;
       logger.info(`Initial issues count: ${initialIssues.length}`);
 
       // Split content into lines
@@ -287,16 +306,19 @@ export class MarkdownLintServer {
         try {
           // Try markdownlint's built-in fix as a fallback
           const mdFix = await import('markdownlint');
-          const markdownlintFix: any = (mdFix as any).default ?? mdFix;
+          const markdownlintFix =
+            (mdFix as unknown as { default?: Markdownlint }).default ??
+            (mdFix as unknown as Markdownlint);
           const fixResults = markdownlintFix.sync({
             strings: {
               [filePath]: originalContent,
             },
             config,
             fix: true,
-          } as any);
+          } as Parameters<Markdownlint['sync']>[0]);
 
-          const fixedContent = (fixResults[filePath] as any)?.fixedContent;
+          const fixedContent = (fixResults[filePath] as import('markdownlint').LintResult[])?.[0]
+            ?.fixedContent as string | undefined;
 
           if (fixedContent && fixedContent !== originalContent) {
             lines = contentToLines(fixedContent);
@@ -316,14 +338,23 @@ export class MarkdownLintServer {
 
       // Get final results
       const mdFinal = await import('markdownlint');
-      const markdownlintFinal: any = (mdFinal as any).default ?? mdFinal;
+      const markdownlintFinal =
+        (mdFinal as unknown as { default?: Markdownlint }).default ??
+        (mdFinal as unknown as Markdownlint);
       const finalResults = markdownlintFinal.sync({
         strings: {
           [filePath]: currentContent,
         },
         config,
       });
-      const finalIssues = (finalResults[filePath] || []) as MarkdownlintIssue[];
+      const finalLintResults = (finalResults[filePath] || []) as import('markdownlint').LintResult[];
+      const finalIssues: MarkdownlintIssue[] = finalLintResults.map(r => ({
+        lineNumber: r.lineNumber,
+        ruleNames: r.ruleNames,
+        ruleDescription: (r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule'),
+        errorDetail: (r as any).errorDetail,
+        fixInfo: (r as any).fixInfo,
+      }));
       logger.info(`Final issues count: ${finalIssues.length}`);
 
       // Generate status report

@@ -27,8 +27,13 @@ export async function readFile(filePath: string): Promise<string> {
     // Check if file exists first
     await fs.access(filePath);
     return await fs.readFile(filePath, 'utf8');
-  } catch (err: any) {
-    if (err && typeof err === 'object' && 'code' in err && (err as any).code === 'ENOENT') {
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      (err as { code?: unknown }).code === 'ENOENT'
+    ) {
       throw new Error(`File not found: ${filePath}`);
     }
     throw err;

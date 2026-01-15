@@ -21,6 +21,7 @@ export interface RuleViolation {
 /**
  * Interface for rule implementations
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Rule {
   /**
    * Rule name
@@ -48,6 +49,7 @@ export interface Rule {
    */
   fix?: (lines: string[], config?: any) => string[];
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Type for the rules map

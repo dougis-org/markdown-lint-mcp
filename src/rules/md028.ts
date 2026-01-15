@@ -21,7 +21,7 @@ export const description = 'Blank line inside blockquote';
  * @param config Optional rule configuration
  * @returns Array of rule violations
  */
-export function validate(lines: string[], _config?: any): RuleViolation[] {
+export function validate(lines: string[], _config?: unknown): RuleViolation[] {
   const violations: RuleViolation[] = [];
 
   // Track blockquote state

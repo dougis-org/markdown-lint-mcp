@@ -39,9 +39,9 @@ export function getLogLevel(): LogLevel {
  * @param message Message to log
  * @param meta Optional metadata to include
  */
-export function debug(message: string, meta?: any): void {
+export function debug(message: string, meta?: unknown): void {
   if (currentLogLevel <= LogLevel.DEBUG) {
-    console.debug(`[DEBUG] ${message}`, meta ? meta : '');
+    console.info(`[DEBUG] ${message}`, meta ? meta : '');
   }
 }
 
@@ -50,7 +50,7 @@ export function debug(message: string, meta?: any): void {
  * @param message Message to log
  * @param meta Optional metadata to include
  */
-export function info(message: string, meta?: any): void {
+export function info(message: string, meta?: unknown): void {
   if (currentLogLevel <= LogLevel.INFO) {
     console.info(`[INFO] ${message}`, meta ? meta : '');
   }
@@ -61,7 +61,7 @@ export function info(message: string, meta?: any): void {
  * @param message Message to log
  * @param meta Optional metadata to include
  */
-export function warn(message: string, meta?: any): void {
+export function warn(message: string, meta?: unknown): void {
   if (currentLogLevel <= LogLevel.WARN) {
     console.warn(`[WARN] ${message}`, meta ? meta : '');
   }
@@ -72,7 +72,7 @@ export function warn(message: string, meta?: any): void {
  * @param message Message to log
  * @param error Optional error to include
  */
-export function error(message: string, error?: any): void {
+export function error(message: string, error?: unknown): void {
   if (currentLogLevel <= LogLevel.ERROR) {
     console.error(`[ERROR] ${message}`, error ? error : '');
   }

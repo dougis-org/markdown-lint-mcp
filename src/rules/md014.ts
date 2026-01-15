@@ -16,7 +16,7 @@ export const description = 'Dollar signs used before commands without showing ou
  * @param config Optional rule configuration
  * @returns Array of rule violations
  */
-export function validate(lines: string[], _config?: any): RuleViolation[] {
+export function validate(lines: string[], _config?: unknown): RuleViolation[] {
   const violations: RuleViolation[] = [];
   let inCodeBlock = false;
   let codeBlockLanguage = '';

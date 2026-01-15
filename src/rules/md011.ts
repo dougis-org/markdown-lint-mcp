@@ -58,7 +58,7 @@ function isInsideCodeBlock(lines: string[], lineIndex: number): boolean {
  * @param config Optional rule configuration
  * @returns Array of rule violations
  */
-export function validate(lines: string[], _config?: any): RuleViolation[] {
+export function validate(lines: string[], _config?: unknown): RuleViolation[] {
   const violations: RuleViolation[] = [];
   // Regex to match reversed link syntax: (text)[url] with support for nested parentheses
   // This matches: opening paren, text (with possible nested parens), closing paren, opening bracket, text, closing bracket
@@ -106,7 +106,7 @@ export function validate(lines: string[], _config?: any): RuleViolation[] {
  * @param config Optional rule configuration
  * @returns Fixed lines array with proper link syntax
  */
-export function fix(lines: string[], _config?: any): string[] {
+export function fix(lines: string[], _config?: unknown): string[] {
   // Regex to match reversed link syntax: (text)[url] with support for nested parentheses
   const reversedLinkRegex = /\(([^)]*(?:\([^)]*\)[^)]*)*)\)\[([^\]]+)\]/g;
 

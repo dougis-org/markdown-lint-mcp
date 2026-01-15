@@ -42,7 +42,11 @@ function getHeadingLevel(line: string): number {
  * @param config Optional rule configuration with expected headings
  * @returns Array of rule violations
  */
-export function validate(lines: string[], _config?: any): RuleViolation[] {
+interface MD043Config {
+  headings?: string[];
+}
+
+export function validate(lines: string[], _config?: MD043Config): RuleViolation[] {
   const violations: RuleViolation[] = [];
 
   // Default configuration - if no headings specified, no violations
