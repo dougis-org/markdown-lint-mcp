@@ -56,7 +56,16 @@ export async function writeFile(filePath: string, content: string): Promise<void
  * @returns Configuration object
  */
 export async function loadConfiguration(directory: string): Promise<MarkdownlintConfig> {
-  const configPath = path.join(directory, '.markdownlint.json');
+  // Resolve the directory and ensure it is within the repository/workspace root
+  const resolvedDir = path.resolve(directory);
+  const workspaceRoot = process.cwd();
+
+  if (!resolvedDir.startsWith(workspaceRoot + path.sep) && resolvedDir !== workspaceRoot) {
+    // Unsafe directory - do not attempt to read files outside of workspace
+    return { ...DEFAULT_CONFIG };
+  }
+
+  const configPath = path.join(resolvedDir, '.markdownlint.json');
 
   try {
     await fs.access(configPath);

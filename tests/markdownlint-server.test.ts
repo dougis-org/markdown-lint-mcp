@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals';
 import fs from 'fs/promises';
 import path from 'path';
+import os from 'os';
 let markdownlint: any;
 import { MarkdownlintIssue } from '../src/types.js';
 
@@ -209,10 +210,14 @@ describe('MarkdownLintServer', () => {
 
   describe('lintMarkdown', () => {
     it('should properly lint a markdown file and report issues', async () => {
+      // Prepare a safe resolved file path in a temporary dir
+      const tmpDir = path.join(os.tmpdir(), `mlint-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const filePath = path.join(tmpDir, 'test.md');
+
       // Setup mocks
       const mockContent = '# Heading\n\nSome text with  extra spaces.';
       const mockLintResults: MockLintResults = {
-        'test.md': [
+        [filePath]: [
           {
             lineNumber: 3,
             ruleNames: ['MD009'],
@@ -232,31 +237,34 @@ describe('MarkdownLintServer', () => {
       mockedFs.access.mockResolvedValue(undefined);
       mockedFs.readFile.mockResolvedValue(mockContent);
       
-        // Mock markdownlint results via Jest's mock registry (avoid importing the real module)
-        const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
+      // Mock markdownlint results via Jest's mock registry (avoid importing the real module)
+      const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
       mockedMarkdownlint.sync.mockReturnValue(mockLintResults as any);
 
       // Import the class after mocks are set up
       const MarkdownLintServer = await importMarkdownLintServer();
       const server = new MarkdownLintServer();
-      
+
       // Call the method under test
-      const result = await server.lintMarkdown('test.md');
+      const result = await server.lintMarkdown(filePath);
 
       // Assertions
-      expect(fs.access).toHaveBeenCalledWith('test.md');
-      expect(fs.readFile).toHaveBeenCalledWith('test.md', 'utf8');
-      expect(markdownlint.sync).toHaveBeenCalled();
+      expect(fs.access).toHaveBeenCalledWith(filePath);
+      expect(fs.readFile).toHaveBeenCalledWith(filePath, 'utf8');      expect(markdownlint.sync).toHaveBeenCalled();
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain('Found 1 issue(s)');
       expect(result.content[0].text).toContain('Trailing spaces');
     });
 
     it('should report no issues when file is compliant', async () => {
+      // Create a temp file path and call the method under test
+      const tmpDir = path.join(os.tmpdir(), `mlint-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const filePath = path.join(tmpDir, 'test.md');
+
       // Setup mocks
       const mockContent = '# Perfect Markdown\n\nThis file has no issues.';
       const mockLintResults: MockLintResults = {
-        'test.md': [],
+        [filePath]: [],
       };
 
       // Mock file operations
@@ -264,17 +272,15 @@ describe('MarkdownLintServer', () => {
       mockedFs.access.mockResolvedValue(undefined);
       mockedFs.readFile.mockResolvedValue(mockContent);
       
-        // Mock markdownlint results via Jest's mock registry (avoid importing the real module)
-        const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
+      // Mock markdownlint results via Jest's mock registry (avoid importing the real module)
+      const mockedMarkdownlint = jest.requireMock('markdownlint') as MockedMarkdownlint;
       mockedMarkdownlint.sync.mockReturnValue(mockLintResults as any);
 
       // Import the class after mocks are set up
       const MarkdownLintServer = await importMarkdownLintServer();
       const server = new MarkdownLintServer();
-      
-      // Call the method under test
-      const result = await server.lintMarkdown('test.md');
 
+      const result = await server.lintMarkdown(filePath);
       // Assertions
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain('No linting issues found');
@@ -292,19 +298,25 @@ describe('MarkdownLintServer', () => {
       const MarkdownLintServer = await importMarkdownLintServer();
       const server = new MarkdownLintServer();
       
-      // Call the method and expect it to throw
-      await expect(server.lintMarkdown('nonexistent.md')).rejects.toThrow('File not found');
+      // Call the method and expect it to throw using a safe, non-existent temp path
+      const tmpDir = path.join(os.tmpdir(), `mlint-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const missing = path.join(tmpDir, 'nonexistent.md');
+      await expect(server.lintMarkdown(missing)).rejects.toThrow('File not found');
     });
   });
 
   describe('fixMarkdown', () => {
     it('should fix markdown issues and report changes', async () => {
+      // Prepare a safe resolved file path in a temporary dir
+      const tmpDir = path.join(os.tmpdir(), `mlint-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const filePath = path.join(tmpDir, 'test.md');
+
       // Setup mocks
       const mockOriginalContent = '# Heading\n\nSome text with  extra spaces.';
       const mockFixedContent = '# Heading\n\nSome text with  extra spaces.';
       
       const mockLintResults: MockLintResults = {
-        'test.md': [
+        [filePath]: [
           {
             lineNumber: 3,
             ruleNames: ['MD009'],
@@ -317,10 +329,9 @@ describe('MarkdownLintServer', () => {
             },
           },
         ],
-      };
-      
+      };      
       const mockFixResults: MockFixResults = {
-        'test.md': {
+        [filePath]: {
           fixedContent: mockFixedContent,
         },
       };
@@ -336,26 +347,29 @@ describe('MarkdownLintServer', () => {
       mockedMarkdownlint.sync
         .mockReturnValueOnce(mockLintResults as any)  // First call (initial check)
         .mockReturnValueOnce(mockFixResults as any)   // Second call (with fix option)
-        .mockReturnValueOnce({ 'test.md': [] } as any); // Third call (final check)
-
+          .mockReturnValueOnce({ [filePath]: [] } as any); // Third call (final check)
       // Import the class after mocks are set up
       const MarkdownLintServer = await importMarkdownLintServer();
       const server = new MarkdownLintServer();
       
-      // Call the method under test
-      const result = await server.fixMarkdown('test.md', true);
+
+      const result = await server.fixMarkdown(filePath, true);
 
       // Assertions
-      expect(fs.writeFile).toHaveBeenCalledWith('test.md', mockFixedContent, 'utf8');
+      expect(fs.writeFile).toHaveBeenCalledWith(filePath, mockFixedContent, 'utf8');
       expect(result.content[0].type).toBe('text');
       expect(result.content[0].text).toContain('Successfully fixed');
     });
 
     it('should report when no fixes are needed', async () => {
+      // Create a temp file path and call the method under test
+      const tmpDir = path.join(os.tmpdir(), `mlint-${Date.now()}-${Math.random().toString(36).slice(2)}`);
+      const filePath = path.join(tmpDir, 'test.md');
+
       // Setup mocks
       const mockContent = '# Perfect Markdown\n\nThis file has no issues.';
       const mockLintResults: MockLintResults = {
-        'test.md': [],
+        [filePath]: [],
       };
 
       // Mock file operations
@@ -370,9 +384,8 @@ describe('MarkdownLintServer', () => {
       // Import the class after mocks are set up
       const MarkdownLintServer = await importMarkdownLintServer();
       const server = new MarkdownLintServer();
-      
-      // Call the method under test
-      const result = await server.fixMarkdown('test.md', true);
+
+      const result = await server.fixMarkdown(filePath, true);
 
       // Assertions
       expect(result.content[0].type).toBe('text');
