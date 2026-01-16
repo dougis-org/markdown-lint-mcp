@@ -29,7 +29,7 @@ jobs:
       - run: npm run lint
       
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@671740ac38dd9b0130fbe1cec585b89eea48d3de
         if: matrix.node-version == '25.x'
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
