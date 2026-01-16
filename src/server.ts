@@ -183,7 +183,7 @@ export class MarkdownLintServer {
       const lintResults = (results[filePath] || []) as import('markdownlint').LintResult[];
       const issues: MarkdownlintIssue[] = lintResults.map(r => {
         const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
-          .fixInfo as any;
+          .fixInfo as unknown;
         const fixInfo =
           rawFix && typeof rawFix === 'object'
             ? {
@@ -279,7 +279,7 @@ export class MarkdownLintServer {
         []) as import('markdownlint').LintResult[];
       const initialIssues: MarkdownlintIssue[] = initialLintResults.map(r => {
         const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
-          .fixInfo as any;
+          .fixInfo as unknown;
         const fixInfo =
           rawFix && typeof rawFix === 'object'
             ? {
@@ -383,7 +383,7 @@ export class MarkdownLintServer {
         []) as import('markdownlint').LintResult[];
       const finalIssues: MarkdownlintIssue[] = finalLintResults.map(r => {
         const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
-          .fixInfo as any;
+          .fixInfo as unknown;
         const fixInfo =
           rawFix && typeof rawFix === 'object'
             ? {

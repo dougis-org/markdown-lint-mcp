@@ -60,7 +60,13 @@ export async function loadConfiguration(directory: string): Promise<Markdownlint
   const resolvedDir = path.resolve(directory);
   const workspaceRoot = process.cwd();
 
-  if (!resolvedDir.startsWith(workspaceRoot + path.sep) && resolvedDir !== workspaceRoot) {
+  // Reject suspicious or out-of-workspace directories to prevent path traversal
+  if (directory.includes('\0')) {
+    return { ...DEFAULT_CONFIG };
+  }
+
+  const rel = path.relative(workspaceRoot, resolvedDir);
+  if (rel.startsWith('..') || path.isAbsolute(rel)) {
     // Unsafe directory - do not attempt to read files outside of workspace
     return { ...DEFAULT_CONFIG };
   }

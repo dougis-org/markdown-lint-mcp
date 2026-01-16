@@ -6,7 +6,39 @@ import fs from 'fs';
 import process from 'process';
 
 try {
-  const input = JSON.parse(fs.readFileSync(0, 'utf8') || '{}');
+  const rawInput = fs.readFileSync(0, 'utf8') || '{}';
+// Protect against overly large inputs
+if (Buffer.byteLength(rawInput, 'utf8') > 200_000) {
+  console.error('Input too large');
+  process.exit(1);
+}
+let input;
+try {
+  input = JSON.parse(rawInput);
+} catch (err) {
+  console.error('Invalid JSON input');
+  process.exit(1);
+}
+// Allow only a small set of expected keys and validate shapes to avoid unsafe usage
+const allowedKeys = new Set(['strings', 'files', 'config', 'options']);
+if (input && typeof input === 'object') {
+  for (const k of Object.keys(input)) {
+    if (!allowedKeys.has(k)) {
+      // drop unexpected keys
+      delete input[k];
+    }
+  }
+
+  if (input.strings && typeof input.strings === 'object') {
+    for (const key of Object.keys(input.strings)) {
+      if (typeof input.strings[key] !== 'string' || input.strings[key].length > 100_000) {
+        delete input.strings[key];
+      }
+    }
+  }
+} else {
+  input = {};
+}
   const strings = input.strings || {};
   const config = input.config || {};
 
