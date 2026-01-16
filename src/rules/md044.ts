@@ -1,4 +1,5 @@
 import { Rule, RuleViolation } from './rule-interface';
+import { findWordMatches } from '../utils/safe-match';
 
 /**
  * MD044: Proper names should have the correct capitalization
@@ -107,46 +108,18 @@ export function validate(lines: string[], _config?: MD044Config): RuleViolation[
 
     // Check for improper capitalization of proper names
     for (const [lowercase, correct] of nameMap.entries()) {
-      // Escape special regex characters in the name
-      const escapedLowercase = lowercase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-      // For names with special characters, use a simpler approach
-      let regex;
-      if (lowercase.match(/[^\w\s]/)) {
-        // Contains special characters - use global search and manual boundary check
-        regex = new RegExp(escapedLowercase, 'gi');
-      } else {
-        // Regular word - use standard word boundaries
-        regex = new RegExp(`\\b${escapedLowercase}\\b`, 'gi');
-      }
-
-      let match;
-      while ((match = regex.exec(line)) !== null) {
-        const foundText = match[0];
-
-        // For special characters, manually check word boundaries
-        if (lowercase.match(/[^\w\s]/)) {
-          const beforeChar = line[match.index - 1];
-          const afterChar = line[match.index + foundText.length];
-
-          // Skip if it's part of a larger word
-          if ((beforeChar && beforeChar.match(/\w/)) || (afterChar && afterChar.match(/\w/))) {
-            continue;
-          }
-        }
+      // Use safe word matching to avoid dynamic RegExp construction
+      const matches = findWordMatches(line, lowercase);
+      for (const idx of matches) {
+        const foundText = line.substr(idx, lowercase.length);
 
         // If the found text doesn't match the correct capitalization
         if (foundText !== correct) {
           violations.push({
             lineNumber: i + 1,
             details: `Proper name "${foundText}" should be "${correct}"`,
-            range: [match.index, match.index + foundText.length],
+            range: [idx, idx + foundText.length],
           });
-        }
-
-        // Prevent infinite loop by breaking if no progress is made
-        if (regex.lastIndex === match.index) {
-          regex.lastIndex++;
         }
       }
     }
@@ -197,35 +170,21 @@ export function fix(lines: string[], _config?: MD044Config): string[] {
 
     let line = fixedLines[i];
 
-    // Replace improper capitalization of proper names
+    // Replace improper capitalization of proper names using safe matching
     for (const [lowercase, correct] of nameMap.entries()) {
-      // Escape special regex characters in the name
-      const escapedLowercase = lowercase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const matches = findWordMatches(line, lowercase);
+      if (matches.length === 0) continue;
 
-      // For names with special characters, use a simpler approach
-      if (lowercase.match(/[^\w\s]/)) {
-        // Contains special characters - use global search and manual boundary check
-        const regex = new RegExp(escapedLowercase, 'gi');
-        line = line.replace(regex, (match, offset) => {
-          const beforeChar = line[offset - 1];
-          const afterChar = line[offset + match.length];
-
-          // Skip if it's part of a larger word
-          if ((beforeChar && beforeChar.match(/\w/)) || (afterChar && afterChar.match(/\w/))) {
-            return match;
-          }
-
-          // If the match doesn't have the correct capitalization, replace it
-          return match !== correct ? correct : match;
-        });
-      } else {
-        // Regular word - use standard word boundaries
-        const regex = new RegExp(`\\b${escapedLowercase}\\b`, 'gi');
-        line = line.replace(regex, match => {
-          // If the match doesn't have the correct capitalization, replace it
-          return match !== correct ? correct : match;
-        });
+      let newLine = '';
+      let lastIdx = 0;
+      for (const idx of matches) {
+        newLine += line.slice(lastIdx, idx);
+        const foundText = line.substr(idx, lowercase.length);
+        newLine += foundText !== correct ? correct : foundText;
+        lastIdx = idx + lowercase.length;
       }
+      newLine += line.slice(lastIdx);
+      line = newLine;
     }
 
     fixedLines[i] = line;

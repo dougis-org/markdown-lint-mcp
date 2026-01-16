@@ -1,4 +1,5 @@
 import { Rule } from './rule-interface';
+import { endsWithPunctuation } from '../utils/safe-match';
 
 /**
  * MD036: Emphasis used instead of a heading
@@ -32,9 +33,7 @@ export function fix(lines: string[], config?: MD036Config): string[] {
   if (lines.length === 0) return lines;
 
   // Default configuration
-  const punctuationRegex = config?.punctuation
-    ? new RegExp(`[${config.punctuation}]$`)
-    : /[.,;:!?]$/;
+  const punctuationConfig = config?.punctuation;
 
   const result: string[] = [];
   let inCodeBlock = false;
@@ -57,7 +56,7 @@ export function fix(lines: string[], config?: MD036Config): string[] {
       const content = boldMatch[2].trim();
 
       // Skip lines with terminal punctuation or that are too short
-      if (punctuationRegex.test(content) || content.length < 2) {
+      if (endsWithPunctuation(content, punctuationConfig) || content.length < 2) {
         return { isHeading: false, content: '', level: 0 };
       }
 
@@ -70,7 +69,7 @@ export function fix(lines: string[], config?: MD036Config): string[] {
       const content = italicMatch[2].trim();
 
       // Skip lines with terminal punctuation or that are too short
-      if (punctuationRegex.test(content) || content.length < 2) {
+      if (endsWithPunctuation(content, punctuationConfig) || content.length < 2) {
         return { isHeading: false, content: '', level: 0 };
       }
 

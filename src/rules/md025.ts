@@ -1,4 +1,5 @@
 import { Rule } from './rule-interface';
+import { hasFrontMatterTitle } from '../utils/safe-match';
 
 /**
  * MD025: Multiple top-level headings in the same document
@@ -33,13 +34,11 @@ export function fix(lines: string[], _config?: MD025Config): string[] {
 
   // Default configuration
   const levelToRestrict = _config?.level || 1;
-  const frontMatterTitleRegex = _config?.front_matter_title
-    ? new RegExp(_config.front_matter_title)
-    : /^\s*title\s*[:=]/;
+  const frontMatterTitlePattern = _config?.front_matter_title;
 
   const result = [...lines];
   let firstTopLevelHeadingIndex = -1;
-  let hasFrontMatterTitle = false;
+  let frontMatterHasTitle = false;
 
   // Check if front matter has a title
   if (lines.length > 0 && lines[0] === '---') {
@@ -48,8 +47,8 @@ export function fix(lines: string[], _config?: MD025Config): string[] {
         break;
       }
 
-      if (frontMatterTitleRegex.test(lines[i])) {
-        hasFrontMatterTitle = true;
+      if (hasFrontMatterTitle(lines[i], frontMatterTitlePattern)) {
+        frontMatterHasTitle = true;
       }
     }
   }
@@ -113,7 +112,7 @@ export function fix(lines: string[], _config?: MD025Config): string[] {
 
     if (level === levelToRestrict) {
       // If we should respect front matter title and one exists, demote all headings
-      if (hasFrontMatterTitle) {
+      if (frontMatterHasTitle) {
         const updatedLines = changeHeadingLevel(line, level, level + 1, nextLine);
 
         // Replace the current line(s)
@@ -159,6 +158,7 @@ export function fix(lines: string[], _config?: MD025Config): string[] {
 /**
  * Rule implementation for MD025
  */
+
 export const rule: Rule = {
   name,
   description,
