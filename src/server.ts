@@ -182,15 +182,19 @@ export class MarkdownLintServer {
 
       const lintResults = (results[filePath] || []) as import('markdownlint').LintResult[];
       const issues: MarkdownlintIssue[] = lintResults.map(r => {
-        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as unknown;
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
+          .fixInfo as unknown;
         const fixInfo = (() => {
           type FixShape = { editColumn?: number; deleteCount?: number; insertText?: string };
           if (rawFix && typeof rawFix === 'object') {
             const candidate = rawFix as FixShape;
             return {
-              editColumn: typeof candidate.editColumn === 'number' ? candidate.editColumn : undefined,
-              deleteCount: typeof candidate.deleteCount === 'number' ? candidate.deleteCount : undefined,
-              insertText: typeof candidate.insertText === 'string' ? candidate.insertText : undefined,
+              editColumn:
+                typeof candidate.editColumn === 'number' ? candidate.editColumn : undefined,
+              deleteCount:
+                typeof candidate.deleteCount === 'number' ? candidate.deleteCount : undefined,
+              insertText:
+                typeof candidate.insertText === 'string' ? candidate.insertText : undefined,
             };
           }
           return undefined;
@@ -280,15 +284,19 @@ export class MarkdownLintServer {
       const initialLintResults = (initialResults[filePath] ||
         []) as import('markdownlint').LintResult[];
       const initialIssues: MarkdownlintIssue[] = initialLintResults.map(r => {
-        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as unknown;
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
+          .fixInfo as unknown;
         const fixInfo = (() => {
           type FixShape = { editColumn?: number; deleteCount?: number; insertText?: string };
           if (rawFix && typeof rawFix === 'object') {
             const candidate = rawFix as FixShape;
             return {
-              editColumn: typeof candidate.editColumn === 'number' ? candidate.editColumn : undefined,
-              deleteCount: typeof candidate.deleteCount === 'number' ? candidate.deleteCount : undefined,
-              insertText: typeof candidate.insertText === 'string' ? candidate.insertText : undefined,
+              editColumn:
+                typeof candidate.editColumn === 'number' ? candidate.editColumn : undefined,
+              deleteCount:
+                typeof candidate.deleteCount === 'number' ? candidate.deleteCount : undefined,
+              insertText:
+                typeof candidate.insertText === 'string' ? candidate.insertText : undefined,
             };
           }
           return undefined;
@@ -353,7 +361,9 @@ export class MarkdownLintServer {
           } as Parameters<Markdownlint['sync']>[0]);
 
           // Avoid indexing by user-provided keys; use first available result
-          const firstResult = Object.values(fixResults)[0] as import('markdownlint').LintResult[] | undefined;
+          const firstResult = Object.values(fixResults)[0] as
+            | import('markdownlint').LintResult[]
+            | undefined;
           const fixedContent = firstResult?.[0]?.fixedContent as string | undefined;
 
           if (fixedContent && fixedContent !== originalContent) {
@@ -386,15 +396,19 @@ export class MarkdownLintServer {
       const finalLintResults = (finalResults[filePath] ||
         []) as import('markdownlint').LintResult[];
       const finalIssues: MarkdownlintIssue[] = finalLintResults.map(r => {
-        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as unknown;
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
+          .fixInfo as unknown;
         const fixInfo = (() => {
           type FixShape = { editColumn?: number; deleteCount?: number; insertText?: string };
           if (rawFix && typeof rawFix === 'object') {
             const candidate = rawFix as FixShape;
             return {
-              editColumn: typeof candidate.editColumn === 'number' ? candidate.editColumn : undefined,
-              deleteCount: typeof candidate.deleteCount === 'number' ? candidate.deleteCount : undefined,
-              insertText: typeof candidate.insertText === 'string' ? candidate.insertText : undefined,
+              editColumn:
+                typeof candidate.editColumn === 'number' ? candidate.editColumn : undefined,
+              deleteCount:
+                typeof candidate.deleteCount === 'number' ? candidate.deleteCount : undefined,
+              insertText:
+                typeof candidate.insertText === 'string' ? candidate.insertText : undefined,
             };
           }
           return undefined;
