@@ -9,8 +9,8 @@ Configuration for AI behavior when interacting with Codacy's MCP Server
 ## using any tool that accepts the arguments: `provider`, `organization`, or `repository`
 - ALWAYS use:
  - provider: gh
- - organization: ernestgwilsonii
- - repository: markdownlint-mcp
+ - organization: dougis-org
+ - repository: markdown-lint-mcp
 - Avoid calling `git remote -v` unless really necessary
 
 ## CRITICAL: After ANY successful `edit_file` or `reapply` operation
@@ -69,13 +69,7 @@ Configuration for AI behavior when interacting with Codacy's MCP Server
 - Do not run `codacy_cli_analyze` looking for changes in code coverage.
 - Do not try to manually install Codacy CLI using either brew, npm, npx, or any other package manager.
 - If the Codacy CLI is not installed, just run the `codacy_cli_analyze` tool from Codacy's MCP Server.
-
-  Preferred workflow for local vs CI Codacy runs:
-  - First, try to run `codacy_cli_analyze` locally via the Codacy MCP Server immediately after edits. If the local run succeeds, propose and apply any fixes as usual.
-  - If the local run fails due to environment or binary-path issues (for example in WSL or other OS-specific contexts), or if the MCP Server is unreachable, do NOT attempt manual local installs. Instead:
-    - Add a brief note on the Pull Request indicating that local Codacy analysis failed and that Codacy checks should run in CI (GitHub Actions).
-    - If the PR is from a fork and GitHub Actions are blocked ("action_required"), request a maintainer to approve the workflow run so Codacy can execute in CI.
-  - When local analysis is unavailable, prefer CI-based Codacy results as authoritative and address issues reported there.
+- When calling `codacy_cli_analyze`, only send provider, organization and repository if the project is a git repository.
 
 ## Whenever a call to a Codacy tool that uses `repository` or `organization` as a parameter returns a 404 error
 - Offer to run the `codacy_setup_repository` tool to add the repository to Codacy
