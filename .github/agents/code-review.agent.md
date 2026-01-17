@@ -12,7 +12,7 @@ tools: ['agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 's
 
 ## Tool Declarations & Access
 - Repository: read-only analysis (file reading, search, usage tracking)
-- Code quality: Codacy scanning, static analysis
+- Code quality: Prefer CI-based Codacy scanning (local scans optional), static analysis
 - GitHub: PR context, diff analysis, review comments
 - Memory: review findings and pattern tracking
 
