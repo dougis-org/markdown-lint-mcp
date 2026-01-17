@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD059: Link text should be descriptive
- * 
+ *
  * This rule is triggered when link text is non-descriptive, such as "click here",
  * "more", "link", etc. These generic terms don't provide context about where the
  * link will take the user, which is important for accessibility.
@@ -47,19 +47,19 @@ const LINK_REGEX = /\[([^\]]+)\]\([^)]+\)/g;
  */
 function isNonDescriptive(text: string): boolean {
   const trimmed = text.trim();
-  
+
   // Very short link text (1-2 characters) is likely non-descriptive
   if (trimmed.length <= 2) {
     return true;
   }
-  
+
   // Check against known non-descriptive patterns
   for (const pattern of NON_DESCRIPTIVE_PATTERNS) {
     if (pattern.test(trimmed)) {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -74,28 +74,28 @@ function suggestImprovedLinkText(linkText: string, surroundingText: string): str
   if (!isNonDescriptive(linkText)) {
     return null;
   }
-  
+
   // Try to find context from surrounding text
   // Get 5 words before and after the link
   const contextWords = surroundingText.split(/\s+/);
   const linkWordIndex = contextWords.findIndex(word => word.includes(`[${linkText}]`));
-  
+
   if (linkWordIndex === -1) {
     // Fallback improvement if we can't find context
     return `More information about ${linkText}`;
   }
-  
+
   // Get words before the link (up to 5)
   const startIndex = Math.max(0, linkWordIndex - 5);
   const beforeWords = contextWords.slice(startIndex, linkWordIndex).join(' ');
-  
+
   // Get words after the link (up to 5)
   const endIndex = Math.min(contextWords.length, linkWordIndex + 6);
   const afterWords = contextWords.slice(linkWordIndex + 1, endIndex).join(' ');
-  
+
   // Try to form an improved link text using context
   let improvedText = '';
-  
+
   // Check for context in surrounding text
   const topicMatch = surroundingText.match(/(?:about|regarding|on|for)\s+(\w+(?:\s+\w+){0,4})/i);
   if (topicMatch && topicMatch[1]) {
@@ -117,7 +117,7 @@ function suggestImprovedLinkText(linkText: string, surroundingText: string): str
     // Fallback if no context is found
     improvedText = `More information about ${linkText}`;
   }
-  
+
   return improvedText;
 }
 
@@ -127,48 +127,48 @@ function suggestImprovedLinkText(linkText: string, surroundingText: string): str
  * @returns Fixed lines array with more descriptive link text
  */
 export function fix(lines: string[]): string[] {
-  return lines.map((line, index) => {
+  return lines.map((line, _index) => {
     // Skip lines that don't have any links
     if (!line.includes('[') || !line.includes('](')) {
       return line;
     }
-    
+
     let result = line;
     let match;
     let offset = 0;
-    
+
     // Reset the regex lastIndex
     LINK_REGEX.lastIndex = 0;
-    
+
     // Process each link in the line
     while ((match = LINK_REGEX.exec(line)) !== null) {
       const [fullMatch, linkText] = match;
-      
+
       // Check if link text is non-descriptive
       if (isNonDescriptive(linkText)) {
         // Use surrounding text for context
         const improvedText = suggestImprovedLinkText(linkText, line);
-        
+
         if (improvedText) {
           // Create the new link text
           const newText = fullMatch.replace(`[${linkText}]`, `[${improvedText}]`);
-          
+
           // Replace at the correct position with the offset applied
           const startPos = match.index + offset;
           const endPos = startPos + fullMatch.length;
-          
+
           // Update the result string
           result = result.substring(0, startPos) + newText + result.substring(endPos);
-          
+
           // Update the offset for subsequent replacements
           offset += newText.length - fullMatch.length;
-          
+
           // Update the lastIndex to account for the change in string length
           LINK_REGEX.lastIndex += newText.length - fullMatch.length;
         }
       }
     }
-    
+
     return result;
   });
 }
@@ -179,7 +179,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

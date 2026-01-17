@@ -2,13 +2,13 @@ import { Rule } from './rule-interface';
 
 /**
  * MD003: Heading style
- * 
+ *
  * This rule enforces a consistent heading style, which could be:
  * - atx: # Heading
  * - atx_closed: # Heading #
  * - setext: Heading
  *           =======
- * 
+ *
  * The default is atx, but this can be configured in .markdownlint.json.
  */
 export const name = 'MD003';
@@ -20,7 +20,7 @@ export const description = 'Heading style';
 enum HeadingStyle {
   ATX = 'atx',
   ATX_CLOSED = 'atx_closed',
-  SETEXT = 'setext'
+  SETEXT = 'setext',
 }
 
 /**
@@ -35,7 +35,10 @@ interface MD003Config {
  * @param line The line to check
  * @returns An object with the heading level and style, or null if not a heading
  */
-function detectHeadingStyle(line: string, nextLine?: string): {
+function detectHeadingStyle(
+  line: string,
+  nextLine?: string
+): {
   level: number;
   style: HeadingStyle;
   content: string;
@@ -48,20 +51,20 @@ function detectHeadingStyle(line: string, nextLine?: string): {
     return {
       level: atxMatch[1].length,
       style: isClosed ? HeadingStyle.ATX_CLOSED : HeadingStyle.ATX,
-      content: atxMatch[2].trim()
+      content: atxMatch[2].trim(),
     };
   }
-  
+
   // Setext style: Heading
   //               =======
   if (nextLine && /^[=-]+$/.test(nextLine.trim())) {
     return {
       level: nextLine.trim()[0] === '=' ? 1 : 2,
       style: HeadingStyle.SETEXT,
-      content: line.trim()
+      content: line.trim(),
     };
   }
-  
+
   return null;
 }
 
@@ -76,23 +79,23 @@ function convertHeadingStyle(
   targetStyle: HeadingStyle
 ): string[] {
   const { level, content } = headingInfo;
-  
+
   // Cannot convert to setext if level > 2
   if (targetStyle === HeadingStyle.SETEXT && level > 2) {
     targetStyle = HeadingStyle.ATX;
   }
-  
+
   switch (targetStyle) {
     case HeadingStyle.ATX:
       return [`${'#'.repeat(level)} ${content}`];
-    
+
     case HeadingStyle.ATX_CLOSED:
       return [`${'#'.repeat(level)} ${content} ${'#'.repeat(level)}`];
-    
+
     case HeadingStyle.SETEXT:
       const underline = level === 1 ? '='.repeat(content.length) : '-'.repeat(content.length);
       return [content, underline];
-      
+
     default:
       return [`${'#'.repeat(level)} ${content}`]; // Default to ATX
   }
@@ -106,28 +109,28 @@ function convertHeadingStyle(
  */
 export function fix(lines: string[], config?: MD003Config): string[] {
   if (lines.length === 0) return lines;
-  
+
   // Default to ATX style if not configured
   const targetStyle = config?.style || HeadingStyle.ATX;
-  
+
   const result: string[] = [];
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const nextLine = i < lines.length - 1 ? lines[i + 1] : undefined;
-    
+
     // Check if this line is a heading
     const headingInfo = detectHeadingStyle(line, nextLine);
-    
+
     if (headingInfo) {
       // We found a heading, let's check if it needs to be converted
       if (headingInfo.style !== targetStyle) {
         // Convert to the target style
         const newHeadingLines = convertHeadingStyle(headingInfo, targetStyle);
-        
+
         // Add the new heading lines
         result.push(...newHeadingLines);
-        
+
         // If we processed a setext heading, skip the next line (the underline)
         if (headingInfo.style === HeadingStyle.SETEXT) {
           i++;
@@ -135,7 +138,7 @@ export function fix(lines: string[], config?: MD003Config): string[] {
       } else {
         // Heading is already in the correct style
         result.push(line);
-        
+
         // If it's a setext heading, also add the underline
         if (headingInfo.style === HeadingStyle.SETEXT) {
           result.push(nextLine!);
@@ -147,7 +150,7 @@ export function fix(lines: string[], config?: MD003Config): string[] {
       result.push(line);
     }
   }
-  
+
   return result;
 }
 
@@ -157,7 +160,7 @@ export function fix(lines: string[], config?: MD003Config): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

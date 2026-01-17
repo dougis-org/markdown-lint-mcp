@@ -2,14 +2,14 @@ import { Rule } from './rule-interface';
 
 /**
  * MD029: Ordered list item prefix
- * 
+ *
  * This rule is triggered when ordered lists don't use the specified prefix style.
  * The rule supports several different styles:
  * - 'one': All items use '1.' as the prefix
  * - 'ordered': Items use increasing numbers ('1.', '2.', etc.)
  * - 'one_or_ordered': Items use either all '1.' or increasing numbers
  * - 'zero': All items use '0.' as the prefix
- * 
+ *
  * Note: This rule is detection-only and doesn't provide automatic fixes
  * because it's hard to automatically determine the correct style.
  */
@@ -34,7 +34,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

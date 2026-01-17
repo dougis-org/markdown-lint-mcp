@@ -7,82 +7,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+- **Node.js Minimum Version**: Increased minimum required version from 16.0.0 to 20.0.0
+  - Updated to support only current and maintained LTS versions
+  - Updated engines in package.json to reflect this requirement
+- **CI/CD Pipeline Updates**:
+  - Test matrix now includes: Node.js 20.x (Iron), 22.x (Jod), 24.x (Krypton), and 25.x (Current)
+  - Updated GitHub Actions: `actions/checkout@v4`, `actions/setup-node@v4`, `codecov/codecov-action@v4`
+  - Coverage reports now uploaded for Node.js 25.x (latest version) instead of 24.x
+  - NPM publish job now uses Node.js 24.x LTS (latest stable) for releases
+- **Documentation Updates**:
+  - Enhanced CONTRIBUTING.md with comprehensive installation and setup instructions
+  - Added detailed breakdown of all production and development dependencies
+  - Updated all version requirements throughout documentation to match new minimum requirements
+  - Added explicit npm version requirement (7.0.0+) to both package.json and documentation
+  - Enhanced dependencies documentation with which npm scripts use each tool
+- **Dependency Version Updates** - Updated all packages to latest stable versions:
+  - `@modelcontextprotocol/sdk`: ^1.0.0 → ^1.25.0
+  - `markdownlint`: ^0.34.0 → ^0.40.0
+  - `typescript`: ^5.0.0 → ^5.9.0
+  - `jest`: ^29.5.0 → ^30.2.0
+  - `@jest/globals`: ^30.0.3 → ^30.2.0
+  - `@types/jest`: ^29.5.0 → ^30.0.0
+  - `@types/node`: ^20.0.0 → ^25.0.0
+  - `eslint`: ^8.40.0 → ^9.0.0
+  - `@typescript-eslint/eslint-plugin`: ^6.0.0 → ^8.53.0
+  - `@typescript-eslint/parser`: ^6.0.0 → ^8.53.0
+  - `eslint-config-prettier`: ^9.0.0 → ^10.0.0
+  - `eslint-plugin-jest`: ^27.2.0 → ^29.12.0
+  - `eslint-plugin-prettier`: ^5.0.0 → ^5.5.0
+  - `prettier`: ^3.0.0 → ^3.7.0
+  - `ts-jest`: ^29.1.0 → ^29.4.0
+- **package.json**:
+  - Added explicit npm engine requirement: `npm >= 7.0.0`
+  - Updated all dependency versions to latest stable releases
+
 ### Added
-- Comprehensive development plan (PLAN.md)
-- Contribution guidelines (CONTRIBUTING.md)
-- Enhanced .gitignore for Node.js projects
-- This CHANGELOG.md to track project evolution
-- Refactored project structure with modular organization:
-  - Created separate directories for rules and utilities
-  - Implemented rule interface for consistent rule implementation
-  - Extracted server logic to dedicated server.ts module
-  - Created file utility functions for file operations
-  - Added structured logging system with configurable log levels
-- Implemented the following markdownlint auto-fix rules:
-  - Phase 1A (Initial Rules):
-    - MD009 - Trailing spaces
-    - MD010 - Hard tabs
-    - MD012 - Multiple consecutive blank lines
-    - MD022 - Headings should be surrounded by blank lines
-    - MD023 - Headings must start at the beginning of the line
-    - MD047 - Files should end with a single newline character
-  - Phase 1B (Heading and Blockquote Rules):
-    - MD018 - No space after hash on atx style heading
-    - MD019 - Multiple spaces after hash on atx style heading
-    - MD020 - No space inside hashes on closed atx style heading
-    - MD021 - Multiple spaces inside hashes on closed atx style heading
-    - MD026 - Trailing punctuation in heading
-    - MD027 - Multiple spaces after blockquote symbol
-  - Phase 1C (Structure and Format Rules):
-    - MD004 - Unordered list style
-    - MD030 - Spaces after list markers
-    - MD031 - Fenced code blocks should be surrounded by blank lines
-    - MD032 - Lists should be surrounded by blank lines
-    - MD034 - Bare URL used
-    - MD040 - Fenced code blocks should have a language specified
-  - Phase 1D (Links, Emphasis, and Style Rules):
-    - MD011 - Reversed link syntax
-    - MD037 - Spaces inside emphasis markers
-    - MD038 - Spaces inside code span elements
-    - MD039 - Spaces inside link text
-    - MD049 - Emphasis style
-    - MD050 - Strong style
-  - Phase 1E (List Indentation and Advanced Link Rules):
-    - MD005 - Inconsistent indentation for list items at the same level
-    - MD007 - Unordered list indentation
-    - MD014 - Dollar signs used before commands without showing output
-    - MD051 - Link fragments should be valid
-    - MD052 - Reference links and images should use a label that is defined
-    - MD053 - Link and image reference definitions should be needed
-    - MD054 - Link and image style
-  - Phase 2A (Table Rules):
-    - MD058 - Tables should be surrounded by blank lines
-  - Phase 2B (Whitespace and Line Rules):
-    - MD035 - Horizontal rule style
-    - MD046 - Code block style
-    - MD048 - Code fence style
-    - MD042 - No empty links
-  - Phase 2C (Table Rules):
-    - MD055 - Table pipe style
-    - MD056 - Table column count
-  - Phase 2D (Accessibility Rules):
-    - MD045 - Images should have alternate text (alt text)
-    - MD059 - Link text should be descriptive
-  - Phase 2E (Heading Structure Rules):
-    - MD001 - Heading levels should only increment by one level at a time
-    - MD003 - Heading style
-    - MD024 - Multiple headings with the same content
-    - MD025 - Multiple top-level headings in the same document
-    - MD036 - Emphasis used instead of a heading
-  - Phase 2F (Remaining Rules - 100% Coverage):
-    - MD013 - Line length
-    - MD028 - Blank line inside blockquote
-    - MD029 - Ordered list item prefix
-    - MD033 - Inline HTML
-    - MD041 - First line in a file should be a top-level heading
-    - MD043 - Required heading structure
-    - MD044 - Proper names should have the correct capitalization
-    - MD049 - Emphasis style
+- Comprehensive CONTRIBUTING.md with:
+  - Complete system requirements documentation
+  - Step-by-step installation guide
+  - Detailed project structure overview
+  - Development workflow instructions
+  - Code quality standards and best practices
+  - Testing guidelines and coverage requirements
+  - CI/CD pipeline documentation
+  - Troubleshooting section with common issues and solutions
+  - Links to relevant resources
+  - Documentation of which npm scripts use each development tool
 
 ### Planned
 - Testing framework with Jest

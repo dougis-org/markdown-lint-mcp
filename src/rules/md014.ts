@@ -2,7 +2,7 @@ import { Rule, RuleViolation } from './rule-interface';
 
 /**
  * MD014: Dollar signs used before commands without showing output
- * 
+ *
  * This rule is triggered when there are dollar signs ($) before shell commands
  * in a code block that doesn't show command output. The dollar signs are unnecessary
  * in this case and should be removed.
@@ -16,23 +16,21 @@ export const description = 'Dollar signs used before commands without showing ou
  * @param config Optional rule configuration
  * @returns Array of rule violations
  */
-export function validate(lines: string[], config?: any): RuleViolation[] {
+export function validate(lines: string[], _config?: unknown): RuleViolation[] {
   const violations: RuleViolation[] = [];
   let inCodeBlock = false;
-  let codeBlockStart = -1;
   let codeBlockLanguage = '';
-  let codeBlockLines: Array<{line: string, lineNumber: number}> = [];
-  
+  let codeBlockLines: Array<{ line: string; lineNumber: number }> = [];
+
   // Process the file line by line
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     // Check for code block boundaries
     if (line.trim().startsWith('```')) {
       if (!inCodeBlock) {
         // Start of code block
         inCodeBlock = true;
-        codeBlockStart = i;
         codeBlockLines = [];
         // Extract the language if specified
         codeBlockLanguage = line.trim().substring(3).trim().toLowerCase();
@@ -43,55 +41,58 @@ export function validate(lines: string[], config?: any): RuleViolation[] {
       }
     } else if (inCodeBlock) {
       // Inside code block - collect lines
-      codeBlockLines.push({line, lineNumber: i + 1});
+      codeBlockLines.push({ line, lineNumber: i + 1 });
     }
   }
-  
+
   return violations;
 }
 
 /**
  * Validate a code block for dollar signs used before commands without showing output
  */
-function validateCodeBlock(codeLines: Array<{line: string, lineNumber: number}>, language: string): RuleViolation[] {
+function validateCodeBlock(
+  codeLines: Array<{ line: string; lineNumber: number }>,
+  language: string
+): RuleViolation[] {
   const violations: RuleViolation[] = [];
-  
+
   // Only process shell/bash/sh code blocks or code blocks without a language
   const relevantLanguages = ['bash', 'sh', 'shell', 'zsh', ''];
   if (!relevantLanguages.includes(language)) {
     return violations; // Return no violations if not a shell code block
   }
-  
+
   // Check if this is a command-only code block (no output)
   let allCommandsWithDollar = true;
   let hasNonEmptyLines = false;
-  
-  for (const {line} of codeLines) {
+
+  for (const { line } of codeLines) {
     const trimmedLine = line.trim();
     if (trimmedLine === '') continue; // Skip empty lines
-    
+
     hasNonEmptyLines = true;
     if (!trimmedLine.startsWith('$ ')) {
       allCommandsWithDollar = false;
       break;
     }
   }
-  
+
   // If all lines are commands with dollar signs, report violations
   if (allCommandsWithDollar && hasNonEmptyLines) {
-    for (const {line, lineNumber} of codeLines) {
+    for (const { line, lineNumber } of codeLines) {
       const trimmedLine = line.trim();
       if (trimmedLine.startsWith('$ ')) {
         const dollarIndex = line.indexOf('$');
         violations.push({
           lineNumber,
           details: `Dollar sign used before command without showing output: '${trimmedLine}'`,
-          range: [dollarIndex, 2] // $ and the space
+          range: [dollarIndex, 2], // $ and the space
         });
       }
     }
   }
-  
+
   return violations;
 }
 
@@ -105,11 +106,11 @@ export function fix(lines: string[]): string[] {
   let inCodeBlock = false;
   let codeBlockLines: string[] = [];
   let codeBlockLanguage = '';
-  
+
   // Process the file line by line
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     // Check for code block boundaries
     if (line.trim().startsWith('```')) {
       if (!inCodeBlock) {
@@ -133,12 +134,12 @@ export function fix(lines: string[]): string[] {
       fixedLines.push(line);
     }
   }
-  
+
   // Handle case where file ends inside a code block
   if (inCodeBlock) {
     fixedLines.push(...codeBlockLines);
   }
-  
+
   return fixedLines;
 }
 
@@ -151,22 +152,22 @@ function fixCodeBlock(codeLines: string[], language: string): string[] {
   if (!relevantLanguages.includes(language)) {
     return codeLines; // Return unchanged if not a shell code block
   }
-  
+
   // Check if this is a command-only code block (no output)
   let allCommandsWithDollar = true;
   let hasNonEmptyLines = false;
-  
+
   for (const line of codeLines) {
     const trimmedLine = line.trim();
     if (trimmedLine === '') continue; // Skip empty lines
-    
+
     hasNonEmptyLines = true;
     if (!trimmedLine.startsWith('$ ')) {
       allCommandsWithDollar = false;
       break;
     }
   }
-  
+
   // If all lines are commands with dollar signs, remove them
   if (allCommandsWithDollar && hasNonEmptyLines) {
     return codeLines.map(line => {
@@ -178,7 +179,7 @@ function fixCodeBlock(codeLines: string[], language: string): string[] {
       return line;
     });
   }
-  
+
   // Otherwise, return unchanged
   return codeLines;
 }
@@ -190,7 +191,7 @@ export const rule: Rule = {
   name,
   description,
   validate,
-  fix
+  fix,
 };
 
 export default rule;

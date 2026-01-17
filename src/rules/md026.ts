@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD026: Trailing punctuation in heading
- * 
+ *
  * This rule is triggered when headings end with punctuation characters (.,;:!?).
  * The punctuation characters are typically unnecessary and don't add value to the heading.
  */
@@ -29,7 +29,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

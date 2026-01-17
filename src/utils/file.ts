@@ -10,10 +10,10 @@ import { MarkdownlintConfig } from '../types.js';
  * Used when no custom configuration is found
  */
 const DEFAULT_CONFIG: MarkdownlintConfig = {
-  'default': true,
-  'MD013': { 'line_length': 120 }, // Allow longer lines for modern displays
-  'MD033': false, // Allow HTML
-  'MD041': false, // Allow files to not start with H1
+  default: true,
+  MD013: { line_length: 120 }, // Allow longer lines for modern displays
+  MD033: false, // Allow HTML
+  MD041: false, // Allow files to not start with H1
 };
 
 /**
@@ -27,11 +27,16 @@ export async function readFile(filePath: string): Promise<string> {
     // Check if file exists first
     await fs.access(filePath);
     return await fs.readFile(filePath, 'utf8');
-  } catch (error) {
-    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+  } catch (err: unknown) {
+    if (
+      err &&
+      typeof err === 'object' &&
+      'code' in err &&
+      (err as { code?: unknown }).code === 'ENOENT'
+    ) {
       throw new Error(`File not found: ${filePath}`);
     }
-    throw error;
+    throw err;
   }
 }
 
@@ -51,13 +56,55 @@ export async function writeFile(filePath: string, content: string): Promise<void
  * @returns Configuration object
  */
 export async function loadConfiguration(directory: string): Promise<MarkdownlintConfig> {
-  const configPath = path.join(directory, '.markdownlint.json');
-  
+  // Basic validation
+  if (!directory || typeof directory !== 'string' || directory.includes('\0')) {
+    return { ...DEFAULT_CONFIG };
+  }
+
+  const workspaceRoot = await fs.realpath(process.cwd());
+
+  // Canonicalize path safely without calling path.resolve on raw user input
+  let resolvedReal: string;
+
+  if (path.isAbsolute(directory)) {
+    // Absolute paths: canonicalize and ensure they are inside the workspace
+    try {
+      resolvedReal = await fs.realpath(directory);
+    } catch {
+      return { ...DEFAULT_CONFIG };
+    }
+
+    if (resolvedReal !== workspaceRoot && !resolvedReal.startsWith(workspaceRoot + path.sep)) {
+      return { ...DEFAULT_CONFIG };
+    }
+  } else {
+    // Relative paths: reject suspicious segments and build a safe candidate
+    const segments = directory.split(/[\\/]+/).filter(Boolean);
+    // Disallow traversal segments or very long paths
+    if (segments.some(s => s === '..') || directory.length > 1024) {
+      return { ...DEFAULT_CONFIG };
+    }
+
+    const candidate = workspaceRoot + path.sep + segments.join(path.sep);
+
+    try {
+      resolvedReal = await fs.realpath(candidate);
+    } catch {
+      return { ...DEFAULT_CONFIG };
+    }
+
+    if (resolvedReal !== workspaceRoot && !resolvedReal.startsWith(workspaceRoot + path.sep)) {
+      return { ...DEFAULT_CONFIG };
+    }
+  }
+
+  const configPath = path.join(resolvedReal, '.markdownlint.json');
+
   try {
     await fs.access(configPath);
     const configContent = await fs.readFile(configPath, 'utf8');
     return JSON.parse(configContent) as MarkdownlintConfig;
-  } catch (error) {
+  } catch {
     // Fall back to default configuration if file not found or invalid
     return { ...DEFAULT_CONFIG };
   }

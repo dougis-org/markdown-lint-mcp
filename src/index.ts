@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { createServer } from './server.js';
-import logger, { LogLevel } from './utils/logger.js';
+import { createServer } from './server';
+import logger, { LogLevel } from './utils/logger';
 
 /**
  * Main entry point for the markdownlint-mcp server
@@ -31,7 +31,7 @@ function main() {
 
   // Create and start the server
   const server = createServer();
-  
+
   // Start the server and handle any startup errors
   server.run().catch(error => {
     logger.error('Failed to start markdownlint MCP server', error);

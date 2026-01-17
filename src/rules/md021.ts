@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD021: Multiple spaces inside hashes on closed atx style heading
- * 
+ *
  * This rule is triggered when more than one space is used to separate the
  * closing hash characters from the heading text in a closed atx style heading.
  * This rule is consistent with the standard CommonMark specification.
@@ -16,9 +16,7 @@ export const description = 'Multiple spaces inside hashes on closed atx style he
  * @returns Fixed lines array with proper spacing inside closing hashes
  */
 export function fix(lines: string[]): string[] {
-  return lines.map(line => 
-    line.replace(/^(#{1,6})[ \t]+(.+?)[ \t]{2,}#$/m, '$1 $2 #')
-  );
+  return lines.map(line => line.replace(/^(#{1,6})[ \t]+(.+?)[ \t]{2,}#$/m, '$1 $2 #'));
 }
 
 /**
@@ -27,7 +25,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

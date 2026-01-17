@@ -3,7 +3,8 @@
  */
 import { jest } from '@jest/globals';
 import { Rule } from '../../src/rules/rule-interface';
-import markdownlint from 'markdownlint';
+// NOTE: Do not import `markdownlint` at module top-level because it is ESM-only
+// and can crash Jest when not transformed; import dynamically only when needed.
 
 /**
  * Test result for a rule violation
@@ -133,13 +134,22 @@ export async function detectViolations(
     ruleConfig[ruleName] = { ...ruleConfig[ruleName], ...config };
   }
   
-  // Run markdownlint
-  const results = markdownlint.sync({
-    strings: {
-      content: markdown
-    },
-    config: ruleConfig
+  // Run markdownlint in a separate Node process to avoid loading ESM into
+  // the Jest/CJS runtime. We use a tiny runner script that imports the ESM
+  // package and returns JSON via stdout.
+  const { spawnSync } = await import('child_process');
+  const runner = spawnSync(process.execPath, [
+    require('path').join(__dirname, '../../scripts/markdownlint-runner.mjs')
+  ], {
+    input: JSON.stringify({ strings: { content: markdown }, config: ruleConfig }),
+    encoding: 'utf8'
   });
+
+  if (runner.status !== 0) {
+    throw new Error(`markdownlint runner failed: ${runner.stderr || runner.stdout}`);
+  }
+
+  const results = JSON.parse(runner.stdout || '{}');
 
   // Extract and return the rule violations
   return (results.content || []) as RuleTestResult[];

@@ -6,12 +6,12 @@ export interface RuleViolation {
    * Line number where the violation was found (1-based)
    */
   lineNumber: number;
-  
+
   /**
    * Details about the violation
    */
   details: string;
-  
+
   /**
    * Range [startIndex, length] where the violation occurs
    */
@@ -21,17 +21,18 @@ export interface RuleViolation {
 /**
  * Interface for rule implementations
  */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export interface Rule {
   /**
    * Rule name
    */
   name: string;
-  
+
   /**
    * Rule description
    */
   description: string;
-  
+
   /**
    * Validate function that checks an array of lines for violations
    * @param lines Array of string lines to validate
@@ -39,7 +40,7 @@ export interface Rule {
    * @returns Array of rule violations
    */
   validate?: (lines: string[], config?: any) => RuleViolation[];
-  
+
   /**
    * Fix function that applies the rule to an array of lines
    * @param lines Array of string lines to fix
@@ -48,6 +49,7 @@ export interface Rule {
    */
   fix?: (lines: string[], config?: any) => string[];
 }
+/* eslint-enable @typescript-eslint/no-explicit-any */
 
 /**
  * Type for the rules map

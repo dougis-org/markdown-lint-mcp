@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD007: Unordered list indentation
- * 
+ *
  * This rule is triggered when unordered list items are not properly indented.
  * By default, this rule enforces a 2-space indentation for nested lists.
  */
@@ -17,11 +17,11 @@ export const description = 'Unordered list indentation';
 export function fix(lines: string[]): string[] {
   const indentationAmount = 2; // Standard indentation (2 spaces)
   const unorderedListItemRegex = /^(\s*)([*+-])\s+(.*)$/;
-  
+
   // Track list nesting levels
   let nestingStack: number[] = [];
   let currentLevel = 0;
-  
+
   return lines.map(line => {
     const match = line.match(unorderedListItemRegex);
     if (!match) {
@@ -32,11 +32,11 @@ export function fix(lines: string[]): string[] {
       }
       return line;
     }
-    
+
     const indentation = match[1].length;
     const marker = match[2];
     const content = match[3];
-    
+
     // Determine nesting level based on indentation
     if (indentation === 0) {
       // Top-level list item
@@ -53,10 +53,10 @@ export function fix(lines: string[]): string[] {
         currentLevel--;
       }
     }
-    
+
     // Calculate correct indentation for this level
     const correctIndentation = ' '.repeat(currentLevel * indentationAmount);
-    
+
     // Return fixed line with correct indentation
     return `${correctIndentation}${marker} ${content}`;
   });
@@ -68,7 +68,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

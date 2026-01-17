@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD046: Code block style
- * 
+ *
  * This rule is triggered when code blocks don't use a consistent style
  * throughout a document. Markdown supports two different code block styles:
  * fenced code blocks using ``` or ~~~ delimiters, and indented code blocks
@@ -47,18 +47,18 @@ function isIndentedCodeBlockLine(line: string, previousLineEmpty: boolean): bool
  */
 export function fix(lines: string[]): string[] {
   if (lines.length === 0) return lines;
-  
+
   // Count fenced and indented code blocks to determine the preferred style
   let fencedCount = 0;
   let indentedCount = 0;
-  
+
   // First pass: count the different types of code blocks
   let inFencedBlock = false;
   let previousLineEmpty = true; // Start assuming the document starts with a blank line (worse case)
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     if (inFencedBlock) {
       if (isFencedCodeBlockEnd(line)) {
         inFencedBlock = false;
@@ -69,29 +69,31 @@ export function fix(lines: string[]): string[] {
     } else if (isIndentedCodeBlockLine(line, previousLineEmpty)) {
       // Potential start of an indented code block
       indentedCount++;
-      
+
       // Skip ahead to count the entire indented block as one
-      while (i + 1 < lines.length && 
-             (isIndentedCodeBlockLine(lines[i + 1], false) || lines[i + 1].trim() === '')) {
+      while (
+        i + 1 < lines.length &&
+        (isIndentedCodeBlockLine(lines[i + 1], false) || lines[i + 1].trim() === '')
+      ) {
         i++;
       }
     }
-    
+
     previousLineEmpty = line.trim() === '';
   }
-  
+
   // Determine preferred style - default to fenced if equal or no blocks found
   const preferFenced = fencedCount >= indentedCount;
-  
+
   // Second pass: convert all code blocks to the preferred style
   const result: string[] = [];
   inFencedBlock = false;
   previousLineEmpty = true;
   let currentIndentedBlock: string[] = [];
-  
+
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
-    
+
     if (inFencedBlock) {
       // Inside a fenced code block, just add the line
       result.push(line);
@@ -110,7 +112,7 @@ export function fix(lines: string[]): string[] {
         if (result.length > 0 && result[result.length - 1].trim() !== '') {
           result.push('');
         }
-        
+
         // Capture the content of the fenced block
         const content: string[] = [];
         let j = i + 1;
@@ -118,50 +120,52 @@ export function fix(lines: string[]): string[] {
           content.push('    ' + lines[j]);
           j++;
         }
-        
+
         // Add the indented content
         result.push(...content);
-        
+
         // Add a blank line after the indented block
         if (j + 1 < lines.length && lines[j + 1].trim() !== '') {
           result.push('');
         }
-        
+
         // Skip to the end of the fenced block
         i = j;
       }
     } else if (isIndentedCodeBlockLine(line, previousLineEmpty)) {
       // Start of an indented code block
       currentIndentedBlock = [line];
-      
+
       // Collect the entire indented block
       let j = i + 1;
-      while (j < lines.length && 
-             (isIndentedCodeBlockLine(lines[j], false) || lines[j].trim() === '')) {
+      while (
+        j < lines.length &&
+        (isIndentedCodeBlockLine(lines[j], false) || lines[j].trim() === '')
+      ) {
         if (lines[j].trim() !== '') {
           currentIndentedBlock.push(lines[j]);
         }
         j++;
       }
-      
+
       if (preferFenced) {
         // Convert to fenced block
         // Add a blank line before the fenced block if needed
         if (result.length > 0 && result[result.length - 1].trim() !== '') {
           result.push('');
         }
-        
+
         // Add the fenced opening
         result.push('```');
-        
+
         // Add the content without the indentation
         for (const blockLine of currentIndentedBlock) {
           result.push(blockLine.replace(/^(    |\t)/, ''));
         }
-        
+
         // Add the fenced closing
         result.push('```');
-        
+
         // Add a blank line after the fenced block if needed
         if (j < lines.length && lines[j].trim() !== '') {
           result.push('');
@@ -170,17 +174,17 @@ export function fix(lines: string[]): string[] {
         // Keep indented block as is
         result.push(...currentIndentedBlock);
       }
-      
+
       // Skip to the end of the indented block
       i = j - 1;
     } else {
       // Regular line, add as is
       result.push(line);
     }
-    
+
     previousLineEmpty = line.trim() === '';
   }
-  
+
   return result;
 }
 
@@ -190,7 +194,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;

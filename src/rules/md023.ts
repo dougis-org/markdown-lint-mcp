@@ -2,7 +2,7 @@ import { Rule } from './rule-interface';
 
 /**
  * MD023: Headings must start at the beginning of the line
- * 
+ *
  * This rule is triggered when headings (any style) don't start at the beginning of the line.
  * Having whitespace before a heading can lead to rendering issues and inconsistent styling.
  */
@@ -32,7 +32,7 @@ export function fix(lines: string[]): string[] {
 export const rule: Rule = {
   name,
   description,
-  fix
+  fix,
 };
 
 export default rule;
