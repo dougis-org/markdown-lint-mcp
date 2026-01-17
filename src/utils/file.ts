@@ -63,19 +63,39 @@ export async function loadConfiguration(directory: string): Promise<Markdownlint
 
   const workspaceRoot = await fs.realpath(process.cwd());
 
-  // Resolve the provided directory path and canonicalize to follow symlinks
-  const resolvedDir = path.resolve(directory);
+  // Canonicalize path safely without calling path.resolve on raw user input
   let resolvedReal: string;
-  try {
-    resolvedReal = await fs.realpath(resolvedDir);
-  } catch {
-    // Path doesn't exist or cannot be canonicalized
-    return { ...DEFAULT_CONFIG };
-  }
 
-  // Ensure the canonical path is inside the workspace root to avoid path traversal
-  if (resolvedReal !== workspaceRoot && !resolvedReal.startsWith(workspaceRoot + path.sep)) {
-    return { ...DEFAULT_CONFIG };
+  if (path.isAbsolute(directory)) {
+    // Absolute paths: canonicalize and ensure they are inside the workspace
+    try {
+      resolvedReal = await fs.realpath(directory);
+    } catch {
+      return { ...DEFAULT_CONFIG };
+    }
+
+    if (resolvedReal !== workspaceRoot && !resolvedReal.startsWith(workspaceRoot + path.sep)) {
+      return { ...DEFAULT_CONFIG };
+    }
+  } else {
+    // Relative paths: reject suspicious segments and build a safe candidate
+    const segments = directory.split(/[\\/]+/).filter(Boolean);
+    // Disallow traversal segments or very long paths
+    if (segments.some(s => s === '..') || directory.length > 1024) {
+      return { ...DEFAULT_CONFIG };
+    }
+
+    const candidate = workspaceRoot + path.sep + segments.join(path.sep);
+
+    try {
+      resolvedReal = await fs.realpath(candidate);
+    } catch {
+      return { ...DEFAULT_CONFIG };
+    }
+
+    if (resolvedReal !== workspaceRoot && !resolvedReal.startsWith(workspaceRoot + path.sep)) {
+      return { ...DEFAULT_CONFIG };
+    }
   }
 
   const configPath = path.join(resolvedReal, '.markdownlint.json');
