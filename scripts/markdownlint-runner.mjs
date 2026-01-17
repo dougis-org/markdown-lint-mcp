@@ -40,59 +40,7 @@ if (input && typeof input === 'object') {
   input = {};
 }
   const strings = input.strings || {};
-
-  // Sanitize config to avoid passing through dangerous keys (like customRules) or paths
-  function looksLikePath(s) {
-    return typeof s === 'string' && (s.includes('/') || s.includes('\\') || s.startsWith('.') || s.includes('..'));
-  }
-
-  function sanitizeConfig(cfg) {
-    if (!cfg || typeof cfg !== 'object' || Array.isArray(cfg)) return {};
-    const forbidden = new Set(['customRules', 'plugins', 'customRulePaths', 'rulesFiles']);
-    const out = {};
-    for (const [k, v] of Object.entries(cfg)) {
-      if (forbidden.has(k)) continue;
-      if (v === null) continue;
-
-      if (typeof v === 'boolean' || typeof v === 'number') {
-        out[k] = v;
-        continue;
-      }
-
-      if (typeof v === 'string') {
-        if (looksLikePath(v)) continue;
-        out[k] = v;
-        continue;
-      }
-
-      if (Array.isArray(v)) {
-        // allow arrays only when all entries are primitives and none look like paths
-        const ok = v.every(el => (['string','number','boolean'].includes(typeof el)) && !looksLikePath(el));
-        if (ok) out[k] = v.slice();
-        continue;
-      }
-
-      if (typeof v === 'object') {
-        const nested = {};
-        for (const [nk, nv] of Object.entries(v)) {
-          if (nv === null) continue;
-          if (typeof nv === 'boolean' || typeof nv === 'number') nested[nk] = nv;
-          else if (typeof nv === 'string' && !looksLikePath(nv)) nested[nk] = nv;
-          else if (Array.isArray(nv)) {
-            const ok2 = nv.every(el => (['string','number','boolean'].includes(typeof el)) && !looksLikePath(el));
-            if (ok2) nested[nk] = nv.slice();
-          }
-        }
-        out[k] = nested;
-        continue;
-      }
-
-      // drop anything else (functions, symbols, etc.)
-    }
-    return out;
-  }
-
-  const config = sanitizeConfig(input.config || {});
+  const config = input.config || {};
 
   // Dynamic import of the ESM package
   // Import the sync-only exports via the package exports entrypoint
