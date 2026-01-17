@@ -107,8 +107,10 @@ export function validate(lines: string[], _config?: MD044Config): RuleViolation[
     }
 
     // Check for improper capitalization of proper names
+    // We intentionally do not use dynamic RegExp construction here to avoid ReDoS
+    // risks. Instead we rely on `findWordMatches`, which uses `indexOf` and
+    // simple boundary checks. This is safe for untrusted or adversarial input.
     for (const [lowercase, correct] of nameMap.entries()) {
-      // Use safe word matching to avoid dynamic RegExp construction
       const matches = findWordMatches(line, lowercase);
       for (const idx of matches) {
         const foundText = line.substr(idx, lowercase.length);
