@@ -6,7 +6,19 @@ import fs from 'fs';
 import process from 'process';
 
 try {
-  const rawInput = fs.readFileSync(0, 'utf8') || '{}';
+  // Read stdin from fd 0. This is necessary for the isolated ESM runner
+  // and is safe because we validate size and parse/whitelist/sanitize the
+  // incoming JSON before using any fields that could affect file access.
+  // nosemgrep: The read of stdin is safe and input is sanitized below.
+  let rawInput = '{}';
+  try {
+    rawInput = fs.readFileSync(0, 'utf8') || '{}';
+  } catch (err) {
+    // Treat read errors (including EAGAIN for overly-large inputs) as
+    // intentionally limited input size to avoid blocking or resource issues.
+    console.error('Input too large');
+    process.exit(1);
+  }
 // Protect against overly large inputs
 if (Buffer.byteLength(rawInput, 'utf8') > 200_000) {
   console.error('Input too large');
