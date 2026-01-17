@@ -56,22 +56,29 @@ export async function writeFile(filePath: string, content: string): Promise<void
  * @returns Configuration object
  */
 export async function loadConfiguration(directory: string): Promise<MarkdownlintConfig> {
-  // Resolve the directory and ensure it is within the repository/workspace root
+  // Basic validation
+  if (!directory || typeof directory !== 'string' || directory.includes('\0')) {
+    return { ...DEFAULT_CONFIG };
+  }
+
+  const workspaceRoot = await fs.realpath(process.cwd());
+
+  // Resolve the provided directory path and canonicalize to follow symlinks
   const resolvedDir = path.resolve(directory);
-  const workspaceRoot = process.cwd();
-
-  // Reject suspicious or out-of-workspace directories to prevent path traversal
-  if (directory.includes('\0')) {
+  let resolvedReal: string;
+  try {
+    resolvedReal = await fs.realpath(resolvedDir);
+  } catch {
+    // Path doesn't exist or cannot be canonicalized
     return { ...DEFAULT_CONFIG };
   }
 
-  const rel = path.relative(workspaceRoot, resolvedDir);
-  if (rel.startsWith('..') || path.isAbsolute(rel)) {
-    // Unsafe directory - do not attempt to read files outside of workspace
+  // Ensure the canonical path is inside the workspace root to avoid path traversal
+  if (resolvedReal !== workspaceRoot && !resolvedReal.startsWith(workspaceRoot + path.sep)) {
     return { ...DEFAULT_CONFIG };
   }
 
-  const configPath = path.join(resolvedDir, '.markdownlint.json');
+  const configPath = path.join(resolvedReal, '.markdownlint.json');
 
   try {
     await fs.access(configPath);
