@@ -13,7 +13,7 @@ tools: ['read', 'agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFi
 - Repository: read-only search & file access (pattern discovery, existing utilities)
   - Plan documentation **CAN and SHOULD** be written to/updated in the repository
 - GitHub: read-only for issue context; write for creating/updating sub-issues
-- Code analysis: Codacy scanning for quality
+- Code analysis: Prefer CI-based Codacy scanning for quality; local scans optional for repro/triage
 - External: context7 for library documentation
 - Memory: persistent decomposition tracking
 

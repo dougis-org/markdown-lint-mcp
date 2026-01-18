@@ -48,7 +48,7 @@ For each acceptance criterion from the GitHub issue:
 
 Run quality analysis on all changed files:
 
-1. **Execute Codacy CLI analysis** on each modified file
+1. **(Optional)** If CI/Codacy central scans are not available, run Codacy CLI analysis on each modified file to reproduce or triage; otherwise rely on CI/Codacy central results
 2. **Review for:**
    - Linting violations
    - Security vulnerabilities
@@ -126,7 +126,7 @@ Before approving for push, confirm:
 - [ ] All unit tests pass
 - [ ] All integration tests pass
 - [ ] Linting/formatting passes
-- [ ] Codacy analysis shows no new issues
+- [ ] Codacy (CI) analysis shows no new issues; if CI results are not available, run local analysis as needed
 - [ ] No unresolved TODO markers without ticket references
 
 **Acceptance Criteria:**

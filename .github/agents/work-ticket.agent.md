@@ -35,7 +35,7 @@ tools: ['execute/getTerminalOutput', 'execute/runTask', 'execute/createAndRunTas
 - All tests pass locally (unit + integration)
 - All applicable linters pass (e.g., Spotless, ESLint, Markdownlint as appropriate for the project)
 - No unresolved TODO markers without ticket references
-- Code quality scanning (Codacy) run after significant file batches
+- Prefer CI-based Codacy scanning after significant file batches; local scans optional for debugging or triage
 - Duplicate code detection run before finalizing changes
 - Code coverage maintained or improved (no regressions)
 - Code complexity thresholds not exceeded (Cyclomatic complexity, etc.)
