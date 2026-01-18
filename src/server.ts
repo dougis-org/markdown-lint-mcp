@@ -25,15 +25,20 @@ import logger from './utils/logger';
  * Provides tools for linting and fixing markdown files
  */
 export class MarkdownLintServer {
+  /** Public, test-visible server package name */
+  public readonly serverName: string;
+
   private server: Server;
 
   /**
    * Initialize the markdownlint MCP server
    */
   constructor() {
+    this.serverName = 'markdown-lint-mcp';
+
     this.server = new Server(
       {
-        name: 'markdown-lint-mcp',
+        name: this.serverName,
         version: '1.0.0',
       },
       {
