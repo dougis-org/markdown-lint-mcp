@@ -1,0 +1,167 @@
+name: Resolve outdated PR comments
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+  workflow_dispatch:
+
+permissions:
+  contents: write  # write needed to allow resolving review threads via GraphQL mutation
+  pull-requests: write
+
+# Avoid overlapping runs per PR / ref
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  resolve:
+    # Keep skipping draft PRs; remove this if you want drafts included
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.draft == false }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout (shallow)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Resolve outdated review threads
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          BATCH_LIMIT: 25  # Max PRs to process in one scheduled/manual run to avoid timeouts
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Batch limit: ${BATCH_LIMIT}"
+
+          OWNER="${REPO%/*}"
+          NAME="${REPO#*/}"
+
+          resolve_for_pr () {
+            local PR="$1"
+            echo "::group::Processing PR #$PR"
+
+            # List outdated & unresolved review threads with pagination (100 per page)
+            local THREAD_IDS=""
+            local PAGE
+            local CURSOR=""
+            local HAS_NEXT_PAGE=true
+            while $HAS_NEXT_PAGE; do
+              if [[ -z "$CURSOR" ]]; then
+                PAGE=$(gh api graphql -f owner="$OWNER" -f name="$NAME" -F pr="$PR" -f query='
+              query($owner: String!, $name: String!, $pr: Int!) {
+                repository(owner: $owner, name: $name) {
+                  pullRequest(number: $pr) {
+                    reviewThreads(first: 100) {
+                      nodes {
+                        id
+                        isResolved
+                        isOutdated
+                      }
+                      pageInfo { hasNextPage endCursor }
+                    }
+                  }
+                }
+              }')
+              else
+                PAGE=$(gh api graphql -f owner="$OWNER" -f name="$NAME" -F pr="$PR" -f after="$CURSOR" -f query='
+              query($owner: String!, $name: String!, $pr: Int!, $after: String!) {
+                repository(owner: $owner, name: $name) {
+                  pullRequest(number: $pr) {
+                    reviewThreads(first: 100, after: $after) {
+                      nodes { id isResolved isOutdated }
+                      pageInfo { hasNextPage endCursor }
+                    }
+                  }
+                }
+              }')
+              fi
+              THREAD_IDS_PAGE=$(echo "$PAGE" | jq -r '.data.repository.pullRequest.reviewThreads.nodes
+                | map(select(.isOutdated == true and .isResolved == false))
+                | .[].id')
+              if [[ -n "$THREAD_IDS_PAGE" ]]; then
+                THREAD_IDS="${THREAD_IDS}"$'\n'"${THREAD_IDS_PAGE}"
+              fi
+              HAS_NEXT_PAGE=$(echo "$PAGE" | jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.hasNextPage')
+              CURSOR=$(echo "$PAGE" | jq -r '.data.repository.pullRequest.reviewThreads.pageInfo.endCursor')
+              if [[ "$HAS_NEXT_PAGE" != "true" ]]; then HAS_NEXT_PAGE=false; fi
+            done
+
+            if [[ -z "${THREAD_IDS:-}" ]]; then
+              echo "No outdated, unresolved threads on #$PR"
+              echo "::endgroup::"
+              return
+            fi
+
+            echo "Resolving threads:"
+            echo "$THREAD_IDS"
+
+            # Filter out any malformed IDs (safety)
+            CLEAN_THREAD_IDS=$(echo "$THREAD_IDS" | grep -E '^PRRT_' || true)
+            if [[ -z "$CLEAN_THREAD_IDS" ]]; then
+              echo "No valid thread IDs after filtering; skipping."
+              echo "::endgroup::"
+              return
+            fi
+
+            while read -r TID; do
+              [[ -z "$TID" ]] && continue
+              ATTEMPTS=0
+              MAX_ATTEMPTS=3
+              while (( ATTEMPTS < MAX_ATTEMPTS )); do
+                if gh api graphql -f id="$TID" -f query='mutation($id: ID!) { resolveReviewThread(input: { threadId: $id }) { thread { id isResolved } } }' >/dev/null 2>err.log; then
+                  echo "Resolved $TID"
+                  break
+                else
+                  STATUS=$?
+                  ((ATTEMPTS++))
+                  ERRMSG=$(cat err.log || true)
+                  echo "Warn: attempt ${ATTEMPTS} failed for $TID (exit $STATUS): $ERRMSG" >&2
+                  # Permission errors should not fail the entire job; break early
+                  if echo "$ERRMSG" | grep -qi 'Resource not accessible'; then
+                    echo "Permission issue for $TID; skipping." >&2
+                    break
+                  fi
+                  sleep 2
+                fi
+              done
+            done <<< "$CLEAN_THREAD_IDS"
+
+            echo "::endgroup::"
+          }
+
+          # Decide which PR(s) to process
+          PRS=()
+          if [[ -n "${PR_NUMBER:-}" ]]; then
+            PRS+=("$PR_NUMBER")
+          else
+            # Scheduled/manual run: gather open PRs then batch
+            mapfile -t ALL_PRS < <(gh api repos/$OWNER/$NAME/pulls \
+              --method GET -f state=open -F per_page=100 --paginate --jq '.[].number')
+            for p in "${ALL_PRS[@]}"; do
+              PRS+=("$p")
+              if [[ ${#PRS[@]} -ge ${BATCH_LIMIT} ]]; then
+                echo "Reached batch limit ${BATCH_LIMIT}; remaining PRs will be processed in future runs." >&2
+                break
+              fi
+            done
+          fi
+
+          if [[ ${#PRS[@]} -eq 0 ]]; then
+            echo "No PRs to process."
+            exit 0
+          fi
+
+          FAILURE_COUNT=0
+          for PR in "${PRS[@]}"; do
+            if ! resolve_for_pr "$PR"; then
+              ((FAILURE_COUNT++)) || true
+            fi
+          done
+          if [[ $FAILURE_COUNT -gt 0 ]]; then
+            echo "Completed with ${FAILURE_COUNT} PR(s) reporting failures (non-fatal)." >&2
+          else
+            echo "Done (all PRs processed successfully)."
+          fi
