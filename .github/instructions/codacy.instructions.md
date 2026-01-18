@@ -60,7 +60,7 @@ Configuration for AI behavior when interacting with Codacy's MCP Server
 - If the Codacy CLI is not installed and a local run is requested, ask for consent to install the CLI and run it; otherwise rely on CI/Codacy central scans.
 
     Preferred workflow for local vs CI Codacy runs (CI-first):
-  - Preferred: Rely on CI (GitHub Actions) first; run `codacy_cli_analyze` locally only if CI/Codacy central results are unavailable and local reproduction is required.rver immediately after edits. If the local run succeeds, propose and apply any fixes as usual.
+  - Preferred: Rely on CI (GitHub Actions) first; run `codacy_cli_analyze` locally only if CI/Codacy central results are unavailable and local reproduction is required.
   - If the local run fails due to environment or binary-path issues (for example in WSL or other OS-specific contexts), or if the MCP Server is unreachable, do NOT attempt manual local installs. Instead:
     - Add a brief note on the Pull Request indicating that local Codacy analysis failed and that Codacy checks should run in CI (GitHub Actions).
     - If the PR is from a fork and GitHub Actions are blocked ("action_required"), request a maintainer to approve the workflow run so Codacy can execute in CI.
