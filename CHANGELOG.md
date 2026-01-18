@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-01-18
+
+### Fixed
+- Correct: Corrected MCP server name to `markdown-lint-mcp` and exported `SERVER_NAME` as the single source-of-truth. (see commit 375b899)
+
 ### Changed
 - **Node.js Minimum Version**: Increased minimum required version from 16.0.0 to 20.0.0
   - Updated to support only current and maintained LTS versions
