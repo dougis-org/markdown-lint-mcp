@@ -33,7 +33,7 @@ export class MarkdownLintServer {
   constructor() {
     this.server = new Server(
       {
-        name: 'markdownlint-mcp',
+        name: 'markdown-lint-mcp',
         version: '1.0.0',
       },
       {
@@ -494,10 +494,10 @@ export class MarkdownLintServer {
    * Start the MCP server
    */
   public async run() {
-    logger.info('Starting markdownlint MCP server');
+    logger.info('Starting markdown-lint MCP server');
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    logger.info('Markdownlint MCP server running on stdio');
+    logger.info('Markdown-lint MCP server running on stdio');
   }
 }
 
