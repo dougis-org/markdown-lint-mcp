@@ -34,7 +34,7 @@ function main() {
 
   // Start the server and handle any startup errors
   server.run().catch(error => {
-    logger.error('Failed to start markdownlint MCP server', error);
+    logger.error(`Failed to start ${server.serverName} server`, error);
     process.exit(1);
   });
 }

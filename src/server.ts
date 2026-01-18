@@ -24,16 +24,23 @@ import logger from './utils/logger';
  * MCP server for markdownlint functionality
  * Provides tools for linting and fixing markdown files
  */
+export const SERVER_NAME = 'markdown-lint-mcp';
+
 export class MarkdownLintServer {
+  /** Public, test-visible server package name */
+  public readonly serverName: string;
+
   private server: Server;
 
   /**
    * Initialize the markdownlint MCP server
    */
   constructor() {
+    this.serverName = SERVER_NAME;
+
     this.server = new Server(
       {
-        name: 'markdownlint-mcp',
+        name: this.serverName,
         version: '1.0.0',
       },
       {
@@ -494,10 +501,10 @@ export class MarkdownLintServer {
    * Start the MCP server
    */
   public async run() {
-    logger.info('Starting markdownlint MCP server');
+    logger.info(`Starting ${this.serverName} MCP server`);
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    logger.info('Markdownlint MCP server running on stdio');
+    logger.info(`${this.serverName} MCP server running on stdio`);
   }
 }
 
