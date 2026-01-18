@@ -499,10 +499,10 @@ export class MarkdownLintServer {
    * Start the MCP server
    */
   public async run() {
-    logger.info('Starting markdown-lint MCP server');
+    logger.info(`Starting ${this.serverName} server`);
     const transport = new StdioServerTransport();
     await this.server.connect(transport);
-    logger.info('Markdown-lint MCP server running on stdio');
+    logger.info(`${this.serverName} running on stdio`);
   }
 }
 
