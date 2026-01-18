@@ -1,6 +1,8 @@
-import { createServer } from '../server';
+import { createServer, SERVER_NAME } from '../server';
 
-test('server exposes the correct package name', () => {
-  const server = createServer();
-  expect(server.serverName).toBe('markdown-lint-mcp');
+describe('MarkdownLintServer', () => {
+  test('server exposes the correct package name', () => {
+    const server = createServer();
+    expect(server.serverName).toBe(SERVER_NAME);
+  });
 });
