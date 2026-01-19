@@ -1,4 +1,4 @@
-import { Rule } from './rule-interface';
+import { Rule } from './rule-interface.js';
 
 /**
  * MD022: Headings should be surrounded by blank lines

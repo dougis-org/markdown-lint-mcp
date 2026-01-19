@@ -1,4 +1,4 @@
-import { Rule } from './rule-interface';
+import { Rule } from './rule-interface.js';
 
 /**
  * MD023: Headings must start at the beginning of the line

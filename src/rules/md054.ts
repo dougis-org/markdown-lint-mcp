@@ -1,4 +1,4 @@
-import { Rule } from './rule-interface';
+import { Rule } from './rule-interface.js';
 
 /**
  * MD054: Link and image style

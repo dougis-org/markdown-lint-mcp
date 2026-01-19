@@ -1,4 +1,4 @@
-import { Rule } from './rule-interface';
+import { Rule } from './rule-interface.js';
 
 /**
  * MD020: No space inside hashes on closed atx style heading

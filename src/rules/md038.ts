@@ -1,4 +1,4 @@
-import { Rule, RuleViolation } from './rule-interface';
+import { Rule, RuleViolation } from './rule-interface.js';
 
 /**
  * MD038: Spaces inside code span elements

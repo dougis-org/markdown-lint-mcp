@@ -1,4 +1,4 @@
-import { createServer, SERVER_NAME } from '../server';
+import { createServer, SERVER_NAME } from '../server.js';
 
 describe('MarkdownLintServer', () => {
   test('server exposes the correct package name', () => {

@@ -1,4 +1,4 @@
-import { Rule, RuleViolation } from './rule-interface';
+import { Rule, RuleViolation } from './rule-interface.js';
 
 /**
  * MD037: Spaces inside emphasis markers

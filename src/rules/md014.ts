@@ -1,4 +1,4 @@
-import { Rule, RuleViolation } from './rule-interface';
+import { Rule, RuleViolation } from './rule-interface.js';
 
 /**
  * MD014: Dollar signs used before commands without showing output

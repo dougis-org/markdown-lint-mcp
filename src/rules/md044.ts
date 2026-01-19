@@ -1,5 +1,5 @@
-import { Rule, RuleViolation } from './rule-interface';
-import { findWordMatches } from '../utils/safe-match';
+import { Rule, RuleViolation } from './rule-interface.js';
+import { findWordMatches } from '../utils/safe-match.js';
 
 /**
  * MD044: Proper names should have the correct capitalization

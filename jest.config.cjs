@@ -13,6 +13,7 @@ module.exports = {
   },
   moduleNameMapper: {
     '^markdownlint$': '<rootDir>/test/jest-markdownlint-adapter.mjs',
+    '^(.*)\\.js$': '$1',
   },
   transformIgnorePatterns: [
     // allow markdownlint to be transformed

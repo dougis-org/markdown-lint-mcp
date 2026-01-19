@@ -10,15 +10,15 @@ import {
 import path from 'path';
 import { MarkdownlintIssue, ToolArguments } from './types.js';
 import type { Markdownlint } from 'markdownlint';
-import { applyRuleFixes, getImplementedRules } from './rules/index';
+import { applyRuleFixes, getImplementedRules } from './rules/index.js';
 import {
   contentToLines,
   linesToContent,
   loadConfiguration,
   readFile,
   writeFile,
-} from './utils/file';
-import logger from './utils/logger';
+} from './utils/file.js';
+import logger from './utils/logger.js';
 
 /**
  * MCP server for markdownlint functionality

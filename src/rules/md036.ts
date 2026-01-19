@@ -1,5 +1,5 @@
-import { Rule } from './rule-interface';
-import { endsWithPunctuation } from '../utils/safe-match';
+import { Rule } from './rule-interface.js';
+import { endsWithPunctuation } from '../utils/safe-match.js';
 
 /**
  * MD036: Emphasis used instead of a heading

@@ -1,5 +1,5 @@
-import { Rule } from './rule-interface';
-import { hasFrontMatterTitle } from '../utils/safe-match';
+import { Rule } from './rule-interface.js';
+import { hasFrontMatterTitle } from '../utils/safe-match.js';
 
 /**
  * MD025: Multiple top-level headings in the same document
