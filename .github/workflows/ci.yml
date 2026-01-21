@@ -5,8 +5,11 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
-  release:
-    types: [created]
+
+permissions:
+  id-token: write  # Required for OIDC
+  contents: write  # Required for semantic-release to create tags and releases
+  pull-requests: read
 
 jobs:
   test:
@@ -36,21 +39,28 @@ jobs:
           file: ./coverage/coverage-final.json
           fail_ci_if_error: false
 
-  publish:
-    name: Publish to NPM
+  release:
+    name: Release to NPM
     needs: test
-    if: github.event_name == 'release' && github.event.action == 'created'
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for semantic-release
+          token: ${{ secrets.GITHUB_TOKEN }}
+      
       - uses: actions/setup-node@v4
         with:
           node-version: '24.x'
           registry-url: 'https://registry.npmjs.org'
+      
       - run: npm ci
       - run: npm run build
-      - run: npm publish --access public
+      
+      - name: Release
         env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npx semantic-release@23
