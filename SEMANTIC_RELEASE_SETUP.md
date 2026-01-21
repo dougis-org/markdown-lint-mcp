@@ -72,9 +72,9 @@ BREAKING CHANGE: Configuration format has changed
 
 You need to set up two secrets in your GitHub repository settings:
 
-1. **`GITHUB_TOKEN`** (usually auto-created, but verify it's available)
-   - Used to create releases and push commits
-   - Settings → Secrets and variables → Actions → New repository secret
+1. **`GITHUB_TOKEN`** (automatically provided by GitHub Actions)
+   - Used by semantic-release to create releases and push commits.
+   - Ensure the release job in your workflow file has `permissions: contents: write`.
 
 2. **`NPM_TOKEN`** (required - you must create this)
    - Used to publish to npm
