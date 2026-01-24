@@ -1,0 +1,6 @@
+[
+  { "name": "syncShape", "hasSync": true, "hasPromise": false, "hasDefault": false },
+  { "name": "promiseShape", "hasSync": false, "hasPromise": true, "hasDefault": false },
+  { "name": "defaultExportSync", "hasSync": true, "hasPromise": false, "hasDefault": true },
+  { "name": "unsupportedShape", "hasSync": false, "hasPromise": false, "hasDefault": false }
+]
