@@ -1,11 +1,18 @@
 ---
-    description: Configuration for AI behavior when interacting withthe MarkdownLint MCP Server
-    applyTo: '**.md'
+description: Configuration for AI behavior when interacting with MarkdownLint MCP Server
+applyTo: '**.md'
 ---
 
-## After ANY successful change applied to any markdown file (Optional)
+# Markdown Linting Rules
 
-- Consider running the `fix_markdown` tool from The Markdown-Lint MCP Server for each file that was edited to supplement quality checks.
-- Once the fix command has completed, optionally run the `lint_markdown` command to discover any remaining issues.
-- If any issues are found in the new edits, propose and apply fixes for them.
-- **If the tools are unavailable or fail:** Gracefully bypass and defer to CI/CD linting. Local markdown linting is supplementary, not a blocking gate.
+## After markdown file edits
+
+Refer to `.github/instructions/includes/local-analysis-pattern.md` for local markdown linting workflow.
+
+### Markdown-specific workflow:
+1. Run `fix_markdown` tool on edited file(s)
+2. Run `lint_markdown` to discover remaining issues
+3. Propose and apply fixes as needed
+
+Refer to `.github/instructions/includes/tool-unavailability-handling.md` if tools are unavailable.
+
