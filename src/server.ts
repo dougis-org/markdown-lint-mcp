@@ -209,7 +209,8 @@ export class MarkdownLintServer {
           ruleNames: r.ruleNames,
           ruleDescription:
             r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
-          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string })
+            .errorDetail,
           fixInfo,
         };
       });
@@ -280,9 +281,11 @@ export class MarkdownLintServer {
         },
         config,
       });
-      const initialLintResults = (initialResults[filePath] || []) as import('markdownlint').LintResult[];
+      const initialLintResults = (initialResults[filePath] ||
+        []) as import('markdownlint').LintResult[];
       const initialIssues: MarkdownlintIssue[] = initialLintResults.map(r => {
-        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as unknown;
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
+          .fixInfo as unknown;
         const fixInfo = (() => {
           type FixShape = { editColumn?: number; deleteCount?: number; insertText?: string };
           if (rawFix && typeof rawFix === 'object') {
@@ -303,7 +306,8 @@ export class MarkdownLintServer {
           ruleNames: r.ruleNames,
           ruleDescription:
             r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
-          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string })
+            .errorDetail,
           fixInfo,
         };
       });
@@ -380,9 +384,11 @@ export class MarkdownLintServer {
         },
         config,
       });
-      const finalLintResults = (finalResults[filePath] || []) as import('markdownlint').LintResult[];
+      const finalLintResults = (finalResults[filePath] ||
+        []) as import('markdownlint').LintResult[];
       const finalIssues: MarkdownlintIssue[] = finalLintResults.map(r => {
-        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown }).fixInfo as unknown;
+        const rawFix = (r as import('markdownlint').LintResult & { fixInfo?: unknown })
+          .fixInfo as unknown;
         const fixInfo = (() => {
           type FixShape = { editColumn?: number; deleteCount?: number; insertText?: string };
           if (rawFix && typeof rawFix === 'object') {
@@ -404,7 +410,8 @@ export class MarkdownLintServer {
           ruleNames: r.ruleNames,
           ruleDescription:
             r.ruleNames && r.ruleNames.length > 0 ? r.ruleNames.join('/') : 'Unknown rule',
-          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string }).errorDetail,
+          errorDetail: (r as import('markdownlint').LintResult & { errorDetail?: string })
+            .errorDetail,
           fixInfo,
         };
       });
