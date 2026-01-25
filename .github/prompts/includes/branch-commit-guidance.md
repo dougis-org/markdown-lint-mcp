@@ -20,11 +20,10 @@ Rules:
 - If branch exists remotely only: `git fetch origin && git switch <branch>`
 - If absent: `git switch -c <branch>`
 
-## Signed Commits
-All commits must be GPG/SSH signed:
-```
-git commit -S -m "<type>(<scope>): #<ISSUE_NUMBER> <imperative summary>"
-```
+## Commit Requirements
+
+**Refer to `.github/prompts/includes/signed-commits-requirement.md` for commit signing requirements.**
+
 Conventional commit types commonly used:
 - `feat`: new end‑user or API capability
 - `fix`: bug fix

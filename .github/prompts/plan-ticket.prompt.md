@@ -4,13 +4,13 @@ description: Build an execution plan for a GitHub issue using TDD and repo conte
 
 ## ⚠️ MODE ENFORCEMENT
 
-**This prompt requires the `plan-ticket` chatmode to be active.**
+Refer to `.github/prompts/includes/mode-enforcement.md` for `plan-ticket` mode requirement.
 
-If you selected a different chatmode (e.g., `find-next-ticket`, `work-ticket`, or `analyze-ticket`), please:
-1. Switch to `.github/chatmodes/plan-ticket.chatmode.md`
-2. Return to this prompt
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
-The chatmode provides behavioral guardrails; this prompt provides specific implementation steps.
+**Signed Commits Requirement:**
+Refer to `.github/prompts/includes/signed-commits-requirement.md` for signed commit configuration.
 
 ---
 
@@ -22,27 +22,45 @@ The chatmode provides behavioral guardrails; this prompt provides specific imple
 
 Required:
 
-- GitHub issue number: {{ISSUE_NUMBER}}
+- Ticket identifier: {{TICKET_ID}} (GitHub issue number or Jira ticket key)
   Optional:
 - Additional links/refs: {{ADDITIONAL_LINKS_OR_PATHS}}
 - Target date / milestone: {{TARGET_DATE_OR_MILESTONE}}
 
-If a URL is provided, extract the issue number (numeric format).
+---
+
+## Step 0: Ticket Detection & Platform Resolution
+
+**Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
+
+Apply the auto-detection steps:
+1. Parse input (numeric → GitHub, alphanumeric → Jira)
+2. Attempt to fetch from assumed platform
+3. If failed, try fallback platform
+4. If both fail, ask user for clarification and corrected ID
+5. Establish PLATFORM and TICKET_ID context
+
+**Outputs from this step:**
+- `PLATFORM` = "github" | "jira"
+- `TICKET_ID` = issue number (GitHub) or ticket key (Jira)
+- `TICKET_URL` = full URL to ticket
+- Cached ticket data: title, description, AC, labels, components, priority, assignee, status
 
 ---
 
-## Step 0: Issue Verification & Branch Creation
+## Step 0.5: Branch Management
 
-1. Use the GitHub API to fetch the issue; do NOT ask the user to paste raw ticket details unless the API is unavailable. Confirm number format.
-2. Ensure clean workspace (`git status` empty) and sync main:
+1. Ensure clean workspace (`git status` empty) and sync main:
    - `git checkout main && git pull --ff-only`
-3. Determine branch prefix from issue type or default to `feature`.
-4. Create or reuse shared issue branch:
-   - Use the GitHub MCP server to list branches (`list_branches`) and to create a branch (`create_branch`).
-   - `git switch -c <PREFIX>/{{ISSUE_NUMBER}}-short-kebab-summary` (truncate ≤ ~60 chars) OR
-   - `git switch <PREFIX>/{{ISSUE_NUMBER}}-short-kebab-summary` if exists.
-5. Confirm: "Planning issue #{{ISSUE_NUMBER}} on branch <PREFIX>/{{ISSUE_NUMBER}}-short-kebab-summary".
-6. Future GitHub issue updates (e.g., decomposition decisions) must use GitHub API actions—never manual text unless API is unavailable (then note fallback in assumptions).
+2. Determine branch prefix:
+   - GitHub: Use labels if present, default to `feature`
+   - Jira: Use ticket type (Story → feature, Bug → fix, Task → chore, Epic → epic)
+3. Create or reuse shared issue branch:
+   - Use GitHub MCP server to list/create branches as needed
+   - `git switch -c <PREFIX>/{{TICKET_ID}}-short-kebab-summary` (truncate ≤ ~60 chars) OR
+   - `git switch <PREFIX>/{{TICKET_ID}}-short-kebab-summary` if exists
+4. Confirm: "Planning {{PLATFORM}} {{TICKET_ID}} on branch <PREFIX>/{{TICKET_ID}}-short-kebab-summary"
+5. Future ticket updates must use appropriate API (GitHub or Jira) — never manual text unless API unavailable (then note fallback)
    (Shared conventions: `.github/prompts/includes/branch-commit-guidance.md`)
 
 7. **Traceability alignment**
@@ -126,7 +144,7 @@ List only blocking items (privacy, auth roles, error contract, SLA/SLO changes, 
 ## Step 4: Plan Construction
 
 Produce sections 1–11 exactly as specified (below). Each implementation step must cite concrete file paths or new file placeholders. Prefer existing utilities over new ones. Default new runtime behavior behind a flag unless trivial & low risk.
-Persist the plan to `docs/plan/tickets/{{ISSUE_NUMBER}}-plan.md` (create directory if missing). The persisted file content MUST match the output sections verbatim.
+Persist the plan to `docs/plan/tickets/{{TICKET_ID}}-plan.md` (create directory if missing). The persisted file content MUST match the output sections verbatim.
 
 ## Quality Criteria for Plan Output
 
@@ -284,9 +302,11 @@ Every AC row filled (no blanks). Tasks reference milestone IDs if applicable.
 
 ```
 git add docs/plan/tickets/{{JIRA_KEY}}-plan.md
-git commit -S -m "chore(plan): {{JIRA_KEY}} add implementation plan"
+git commit -m "chore(plan): {{JIRA_KEY}} add implementation plan"
 git push -u origin <PREFIX>/{{JIRA_KEY}}-short-kebab-summary
 ```
+
+**Note:** Signed commit requirements are managed in `.github/prompts/includes/signed-commits-requirement.md`. Include the `-S` flag per that include file's configuration.
 
 Open PR referencing the plan file; request CODEOWNERS.
 

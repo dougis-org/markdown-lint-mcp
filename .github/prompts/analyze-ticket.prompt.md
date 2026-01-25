@@ -4,15 +4,11 @@ description: Analyze a ticket-level plan file to ensure the plan delivers the re
 
 # analyze-ticket Prompt
 
-## ⚠️ MODE ENFORCEMENT
+**Mode Requirement:**
+Refer to `.github/prompts/includes/mode-enforcement.md` for `analyze-ticket` mode requirement.
 
-**This prompt requires the `plan-ticket` chatmode to be active.**
-
-If you selected a different chatmode (e.g., `find-next-ticket` or `work-ticket`), please:
-1. Switch to `.github/chatmodes/plan-ticket.chatmode.md`
-2. Return to this prompt
-
-The chatmode provides execution guardrails; this prompt provides specific analysis workflow.
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ---
 
@@ -22,7 +18,7 @@ User input:
 
 $ARGUMENTS
 
-Goal: Validate a ticket plan produced by `plan-ticket` (persisted to `docs/plan/tickets/{{ISSUE_NUMBER}}-plan.md`) and verify the plan:
+Goal: Validate a ticket plan produced by `plan-ticket` (persisted to `docs/plan/tickets/{{TICKET_ID}}-plan.md`) and verify the plan:
 - faithfully implements the ticket's acceptance criteria and requirements,
 - leaves no uncovered edge cases or test gaps,
 - contains a sensible, single deliverable or, if not, provides a deterministic decomposition suggestion.
@@ -32,17 +28,36 @@ Produce a structured analysis report and optional remediation suggestions (do no
 The analysis must be deterministic and repeatable. If the user provides additional context or corrections, incorporate them explicitly.
 If the user requests you to update the plan, only then edit the plan file (only files matching `docs/plan/tickets/*-plan.md` should be edited).
 
-Agent Guidelines: Follow the repository agent guidance in `AGENTS.md`. Any conflict with a MUST rule in `AGENTS.md` (for example: mandatory GPG-signed commits, TDD requirement) is CRITICAL and must be reported (not suppressed).
+Agent Guidelines: Follow the repository agent guidance in `AGENTS.md`. Any conflict with a MUST rule in `AGENTS.md` (for example: TDD requirement, commit signing configured in `.github/prompts/includes/signed-commits-requirement.md`) is CRITICAL and must be reported (not suppressed).
 
 Execution steps:
 
-1. Ticket detection & plan location
-   - If a GitHub issue number is provided in input, validate it (pattern `[0-9]+`). If not provided, ask the user for the issue number.
-   - Derive PLAN_PATH = `docs/plan/tickets/{{ISSUE_NUMBER}}-plan.md`. If the plan file is missing, abort and instruct the user to run the planning mode.
+1. Ticket detection & plan validation
+   - **Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
+   - Apply the auto-detection steps:
+     1. Parse input (numeric → GitHub, alphanumeric → Jira)
+     2. Attempt to fetch from assumed platform
+     3. If failed, try fallback platform
+     4. If both fail, ask user for clarification and corrected ID
+     5. Establish PLATFORM and TICKET_ID context
+   - Derive PLAN_PATH = `docs/plan/tickets/{{TICKET_ID}}-plan.md`. 
+   - **Plan file must exist and contain all required sections:**
+     * Section 1: Summary
+     * Section 2: Requirements
+     * Section 3: Acceptance Criteria
+     * Section 4: Implementation Design
+     * Section 5: Test Plan & Pre-Commit Quality Review
+     * Section 6: Risk & Rollout
+     * Section 7: Observability
+     * Section 8: Effort & Dependencies
+     * Section 9: Open Questions / Assumptions
+     * Section 10: Related Tickets
+     * Section 11: Decomposition (if applicable)
+   - If the plan file is missing or missing required sections, abort and instruct the user to run the planning mode.
 
 2. Required artifacts to load (read-only):
    - `PLAN` = PLAN_PATH (required)
-   - If referenced in plan or present via `.specify/scripts/bash/check-prerequisites.sh`, also load `FEATURE_DIR/spec.md` and `FEATURE_DIR/tasks.md` (optional but recommended). If the plan references files, load those files when present.
+   - If referenced in plan, also load `FEATURE_DIR/spec.md` and `FEATURE_DIR/tasks.md` (optional but recommended). If the plan references files, load those files when present.
    - Load agent guidelines `AGENTS.md`.
 
 3. Parse the plan file (expect the 11 sections the `plan-ticket` prompt mandates). Extract:
@@ -151,7 +166,7 @@ Behavioral rules:
 - If zero issues found, emit a success summary with coverage metrics and next-step guidance.
 
 Assumptions & fallback rules:
-- If `detect-ticket-mode.sh` is unavailable, accept a JIRA key in input; otherwise abort.
+- Accept a JIRA key directly in input if GitHub issue number is not provided.
 - If referenced files aren't present in workspace, mark warnings but continue analysis on available plan content.
 
 End of prompt.

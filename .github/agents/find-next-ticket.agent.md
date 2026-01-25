@@ -1,11 +1,14 @@
 ---
 description: 'Return only the next GitHub issue that can safely be started (critical path first); if none, explain blockers.'
-tools: ['read/readFile', 'agent', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'edit/editNotebook', 'search', 'upstash/context7/*', 'deepcontext/*', 'sequentialthinking/*', 'gh-issues/*', 'gh-projects/get_project', 'gh-projects/list_project_items', 'desktop-commander-wonderwhy/edit_block', 'desktop-commander-wonderwhy/read_multiple_files', 'desktop-commander-wonderwhy/start_search', 'desktop-commander-wonderwhy/stop_search', 'todo']
+tools: ['read/readFile', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'edit/editNotebook', 'search', 'deepcontext/*', 'desktop-commander-wonderwhy/create_directory', 'desktop-commander-wonderwhy/edit_block', 'desktop-commander-wonderwhy/get_file_info', 'desktop-commander-wonderwhy/list_searches', 'desktop-commander-wonderwhy/move_file', 'desktop-commander-wonderwhy/read_file', 'desktop-commander-wonderwhy/read_multiple_files', 'desktop-commander-wonderwhy/start_search', 'desktop-commander-wonderwhy/stop_search', 'desktop-commander-wonderwhy/write_file', 'gh-issues/*', 'markdownlint/*', 'sequentialthinking/*', 'upstash/context7/*', 'agent', 'todo']
 ---
 
 # Find Next Ticket Chat Mode
 
 **Purpose:** Select the single next executable GitHub issue based on dependency ordering (blocks/blocked-by), priority, and milestone. Read-only mode; no side effects.
+
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ## Tool Declarations & Access
 - GitHub query: read-only search & fetch

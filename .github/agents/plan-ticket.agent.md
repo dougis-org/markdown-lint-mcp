@@ -1,6 +1,6 @@
 ---
 description: 'Focused mode to produce an execution‑ready implementation plan (TDD-first) for a single GitHub issue (with early scope decomposition & optional sub-issue generation)'
-tools: ['read', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web/fetch', 'deepcontext/*', 'desktop-commander-wonderwhy/create_directory', 'desktop-commander-wonderwhy/edit_block', 'desktop-commander-wonderwhy/get_file_info', 'desktop-commander-wonderwhy/get_more_search_results', 'desktop-commander-wonderwhy/list_searches', 'desktop-commander-wonderwhy/move_file', 'desktop-commander-wonderwhy/read_file', 'desktop-commander-wonderwhy/read_multiple_files', 'desktop-commander-wonderwhy/start_search', 'desktop-commander-wonderwhy/stop_search', 'gh-issues/*', 'gh-labels/get_label', 'gh-labels/list_label', 'gh-projects/get_project_item', 'gh-projects/list_project_items', 'gh-projects/update_project_item', 'github/create_branch', 'github/issue_read', 'github/issue_write', 'github/list_branches', 'markdownlint/*', 'sequentialthinking/*', 'upstash/context7/*', 'agent', 'todo']
+tools: ['read/readFile', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'search', 'web/fetch', 'deepcontext/*', 'desktop-commander-wonderwhy/create_directory', 'desktop-commander-wonderwhy/edit_block', 'desktop-commander-wonderwhy/force_terminate', 'desktop-commander-wonderwhy/get_file_info', 'desktop-commander-wonderwhy/get_more_search_results', 'desktop-commander-wonderwhy/list_directory', 'desktop-commander-wonderwhy/list_processes', 'desktop-commander-wonderwhy/list_searches', 'desktop-commander-wonderwhy/move_file', 'desktop-commander-wonderwhy/read_file', 'desktop-commander-wonderwhy/read_multiple_files', 'desktop-commander-wonderwhy/read_process_output', 'desktop-commander-wonderwhy/start_search', 'desktop-commander-wonderwhy/stop_search', 'desktop-commander-wonderwhy/write_file', 'gh-actions/actions_get', 'gh-actions/actions_list', 'gh-actions/get_job_logs', 'gh-issues/*', 'gh-labels/*', 'gh-projects/*', 'github/create_branch', 'github/list_branches', 'github/list_tags', 'github/push_files', 'github/request_copilot_review', 'github/search_code', 'github/search_issues', 'markdownlint/*', 'playwright/*', 'mongodb/collection-schema', 'mongodb/find', 'mongodb/insert-many', 'mongodb/list-collections', 'sequentialthinking/*', 'upstash/context7/*', 'agent', 'todo']
 ---
 
 # Plan Ticket Chat Mode
@@ -8,6 +8,12 @@ tools: ['read', 'edit/createDirectory', 'edit/createFile', 'edit/editFiles', 'se
 **Purpose:** Mode for planning and designing work with reusable pattern discovery and scope decomposition.
 
 **Role:** Senior architect designing a scalable plan for work and raising quality standards for the entire organization.
+
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**TDD Enforcement:**
+Refer to `.github/agents/includes/tdd-enforcement-cycle.md` for RED/GREEN/Refactor cycle.
 
 ## Tool Declarations & Access
 - Repository: read-only search & file access (pattern discovery, existing utilities)

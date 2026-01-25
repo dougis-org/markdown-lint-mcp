@@ -1,0 +1,1 @@
+All file operations, code search, and repository interactions must use MCP tools as mandated in `.github/prompts/includes/mcp-tooling-requirements.md`. Shell command workarounds are forbidden. MCP tools provide superior context, error handling, and GitHub/Jira integration.

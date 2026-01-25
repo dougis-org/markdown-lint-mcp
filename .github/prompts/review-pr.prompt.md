@@ -5,15 +5,18 @@ description: 'Review a pull request against GitHub issue acceptance criteria wit
 
 # Review Pull Request
 
-Review a GitHub pull request against the requirements and acceptance criteria from a GitHub issue, acting as a senior code reviewer focused on quality, maintainability, and correctness.
+Review a pull request against the requirements and acceptance criteria from a GitHub issue or Jira ticket, acting as a senior code reviewer focused on quality, maintainability, and correctness.
+
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ## Required Inputs
 
-**GitHub Issue:** {{issueNumber}}
+**Ticket Identifier:** {{TICKET_ID}}
 **Pull Request:** {{pullRequest}}
 
 > ⚠️ This prompt requires:
-> - A valid GitHub issue number containing acceptance criteria
+> - A valid GitHub issue number or Jira ticket key containing acceptance criteria
 > - A pull request reference in one of these formats:
 >   - PR URL: `https://github.com/owner/repo/pull/123`
 >   - Owner/repo + PR number: `owner/repo#123`
@@ -22,9 +25,26 @@ Review a GitHub pull request against the requirements and acceptance criteria fr
 
 ## Review Workflow
 
+### Step 0: Ticket Detection & Platform Resolution
+
+**Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
+
+Apply the auto-detection steps:
+1. Parse input (numeric → GitHub, alphanumeric → Jira)
+2. Attempt to fetch from assumed platform
+3. If failed, try fallback platform
+4. If both fail, ask user for clarification and corrected ID
+5. Establish PLATFORM and TICKET_ID context
+
+**Outputs from this step:**
+- `PLATFORM` = "github" | "jira"
+- `TICKET_ID` = normalized ticket identifier
+- Cached ticket data: title, description, AC, labels
+
+
 ### Step 1: Gather Context
 
-1. **Fetch GitHub issue details** using GitHub API for the provided issue number
+1. **Fetch ticket details** using the appropriate API (GitHub or Jira) for the provided identifier
 2. **Extract and document:**
    - Summary and description
    - Acceptance Criteria (AC)

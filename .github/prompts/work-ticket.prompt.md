@@ -2,54 +2,51 @@
 description: Execute an approved implementation plan for a GitHub issue.
 ---
 
-## ⚠️ MODE ENFORCEMENT
+## ⚠️ MODE REQUIREMENT
 
-**This prompt requires the `work-ticket` chatmode to be active.**
+Refer to `.github/prompts/includes/mode-enforcement.md` for `work-ticket` mode requirement.
 
-If you selected a different chatmode (e.g., `find-next-ticket`, `plan-ticket`, or `analyze-ticket`), please:
-1. Switch to `.github/chatmodes/work-ticket.chatmode.md`
-2. Return to this prompt
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
-The chatmode provides execution guardrails; this prompt provides specific implementation workflow.
+**Signed Commits Requirement:**
+Refer to `.github/prompts/includes/signed-commits-requirement.md` for signed commit configuration.
 
 ---
 
 **Goal:** Implement the plan produced by `plan-ticket` with TDD, quality gates, and Jira + branch hygiene.
 
-> This prompt assumes a plan file already exists. If not, run `plan-ticket`.
-
 ## Inputs
 Required:
-- **GitHub issue number:** {{ISSUE_NUMBER}}
+- **Ticket identifier:** {{TICKET_ID}} (GitHub issue number or Jira ticket key)
 Optional:
-- **Plan file:** `docs/plan/tickets/{{ISSUE_NUMBER}}-plan.md` (default)
+- **Plan file:** `docs/plan/tickets/{{TICKET_ID}}-plan.md` (default)
 - **Repo root:** current workspace
 
 ---
-## Mode Guard
-```
-RESULT=$(scripts/detect-ticket-mode.sh "${USER_INPUT}")
-STATUS=$(echo "$RESULT" | jq -r .status)
-JIRA_KEY=$(echo "$RESULT" | jq -r .jiraKey)
-```
-STATUS rules:
-- need_ticket → request key & STOP
-- plan_mode → ask to switch to planning; abort if yes
-- replan_recommended → show issues; STOP until corrected
-- ambiguous → ask user (plan/work)
-- work_mode → continue
+## Ticket Detection & Platform Resolution
 
-Additional validation:
-- Plan file must exist & contain sections 1–10 (11 if present)
-- Warn if stale (diagnostics) → require confirmation
-- Redirect if user intent is scoping vs coding
+**Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
+
+Apply the auto-detection steps:
+1. Parse input (numeric → GitHub, alphanumeric → Jira)
+2. Attempt to fetch from assumed platform
+3. If failed, try fallback platform
+4. If both fail, ask user for clarification and corrected ID
+5. Establish PLATFORM and TICKET_ID context
+
+**Outputs from this step:**
+- `PLATFORM` = "github" | "jira"
+- `TICKET_ID` = normalized ticket identifier
+- `TICKET_URL` = full URL to ticket
+- Cached ticket data for use throughout execution
 
 ---
 ## Phase 0: Parameters + Plan Load
-0.1 Fetch GitHub issue via GitHub API; never ask user to paste ticket unless API unavailable (then record assumption). Validate number format (numeric).
-0.2 Load plan; parse sections; fail fast if missing.
-0.3 Summarize (Sections 1,3,5) for confirmation.
-0.4 If not already in progress, use GitHub API to update issue status and add start comment. If API fails, note fallback and proceed cautiously.
+0.1 Apply ticket detection (see Ticket Detection & Platform Resolution section above)
+0.2 Load plan at `docs/plan/tickets/{{TICKET_ID}}-plan.md`; verify all 11 sections present and parse
+0.3 Summarize (Sections 1, 3, 6) for confirmation.
+0.4 If not already in progress, use appropriate platform API (GitHub or Jira) to update ticket status and add start comment. If API fails, note fallback and proceed cautiously.
 
 ## Phase 2: TDD (RED)
 2.1 Unit tests (nominal + boundary + error) 
@@ -140,10 +137,9 @@ Failures → fix root cause (never dilute tests).
 6.3 Negative & error path spot checks 
 6.4 Document deviations (justify or request plan update)
 
----
 ## Phase 7: Commit & PR
 7.1 `git add .`
-7.2 `git commit -S -m "feat(<scope>): {{JIRA_KEY}} <concise summary>"` (use `fix|chore|refactor|docs|test` as appropriate)
+7.2 `git commit -m "feat(<scope>): {{JIRA_KEY}} <concise summary>"` (use `fix|chore|refactor|docs|test` as appropriate; include `-S` flag per `.github/prompts/includes/signed-commits-requirement.md` configuration)
 7.3 `git push -u origin <prefix>/{{JIRA_KEY}}-short-kebab-summary`
 7.4 Open PR (template) including: ticket, plan link, summary, risk (plan §6), rollout (plan §9), test evidence, flag usage
 7.5 Request CODEOWNERS & domain reviewers

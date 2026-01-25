@@ -1,66 +1,200 @@
 ---
-description: Cut a PR from the current branch to a user provided one
+description: Cut a PR from the current branch to the default branch with automatic PR creation
 ---
-**Goal:** Cut a PR to the target branch implementing the work scoped in the provided GitHub issue plan file/repo changes.
 
-> This prompt assumes there are changes pushed to remote from the current branch. If not, please push your changes first.
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
+
+**Goal:** Verify all changes are committed and pushed to the current branch, then automatically cut a PR to the repository's default branch with a semantic title and complete description using the repository's PR template (or best practices if no template exists).
 
 ## Inputs
-Required:
-- **Target Branch:** {{BRANCH_NAME}} (user input)
 Optional:
-- **Added Comments:** {{ADDED_COMMENTS}} (user input)
-- **GitHub Issue Number:** {{ISSUE_NUMBER}} (user input)
+- **Added Comments:** {{ADDED_COMMENTS}} (user input for additional PR notes)
+- **Ticket Identifier:** {{TICKET_ID}} (GitHub issue number or Jira ticket key, optional; auto-detected from branch name if not provided)
 - **Current branch:** current workspace
 
-## Phase 0: Confirm Inputs
-0.1 Echo the target branch: {{BRANCH_NAME}} and GitHub Issue Number: {{ISSUE_NUMBER}} (if provided)
-0.2 Echo any added comments: {{ADDED_COMMENTS}} (if provided)
-0.3 Confirm the input with the user before proceeding, if they provide changes update the inputs accordingly.
-0.4 Confirm the current branch is not {{BRANCH_NAME}}. If it is, abort with an error message.
-0.5 Confirm there are changes pushed to remote from the current branch. If not, abort with an error message.
-0.6 Confirm that {{BRANCH_NAME}} exists on remote. If not, abort with an error message.
-0.7 Confirm that the current branch is up to date with remote. If not, abort with an error message.
-0.8 Confirm that there are no merge conflicts between the current branch and {{BRANCH_NAME}}. If there are, abort with an error message.
----
+## Phase 0: Pre-flight Checks
 
-## Phase 1: Read changes
-0.1 `git fetch origin`  
-0.2 `git diff origin/{{BRANCH_NAME}}...HEAD --stat` → summarize
-0.3 `git diff origin/{{BRANCH_NAME}}...HEAD` → analyze for plan adherence
+### 0.1 Validate Current Branch State
+Execute the following checks in order. **If any check fails, abort immediately with a clear error message.**
 
----
-## Phase 2: Generate PR Content
-### Title
-Generate {{PR_TITLE}} based on the changes made and the GitHub Issue Number: {{ISSUE_NUMBER}} (if provided).
-This must be a semantic title (remember to place the GitHub issue number right after the : if there is a GitHub issue number).
-
-### Description
-{{PR_DESCRIPTION}}
-Please generate a detailed PR description based on the changes made. 
-The description should use the .github/pull-request-template.md file as a template,
-and must fill out all sections.
-If the user has provided {{ADDED_COMMENTS}}, please include them at the end of the PR description
-under a section named "Additional Comments".
-
-## Phase 3: Confirm PR Content
-echo the generated {{PR_TITLE}} and {{PR_DESCRIPTION}} to the user for confirmation.
-
-Use this format:
+**0.1.1 Check for uncommitted changes:**
 ```
+git status --porcelain
+```
+- If output is non-empty (uncommitted changes exist): **FATAL ERROR** - User must commit changes first. Provide guidance: `git add . && git commit -m "<message>"`
+
+**0.1.2 Check for unpushed commits:**
+```
+git log origin/$(git rev-parse --abbrev-ref HEAD)..HEAD --oneline
+```
+- If output is non-empty (commits not yet pushed): **FATAL ERROR** - User must push changes or authorize agent to push
+  - Offer: "Changes detected that have not been pushed to remote. I can push them for you with your approval. Proceed? (yes/no)"
+  - If user approves: `git push -u origin $(git rev-parse --abbrev-ref HEAD)` → wait for success
+  - If user declines: abort and provide guidance: `git push -u origin <branch-name>`
+  - If push fails: report error and abort
+
+**0.1.3 Verify branch is up to date with remote:**
+```
+git fetch origin
+git rev-parse HEAD
+git rev-parse origin/$(git rev-parse --abbrev-ref HEAD)
+```
+- If the two SHAs do not match: **FATAL ERROR** - Current branch is behind remote. User must pull: `git pull origin $(git rev-parse --abbrev-ref HEAD)`
+
+**0.1.4 Get repository metadata:**
+- Determine CURRENT_BRANCH = `git rev-parse --abbrev-ref HEAD`
+- Determine DEFAULT_BRANCH = repository default branch (via GitHub API)
+- Verify CURRENT_BRANCH ≠ DEFAULT_BRANCH. If equal: **FATAL ERROR** - "Cannot cut PR from default branch to itself."
+
+**0.1.5 Verify no merge conflicts (dry-run):**
+```
+git merge --no-commit --no-ff origin/{{DEFAULT_BRANCH}} (on current branch)
+```
+Then:
+```
+git merge --abort
+```
+- If merge conflicts detected: **FATAL ERROR** - User must resolve conflicts manually. Provide guidance on resolving and pushing.
+
+**All checks passed?** → Proceed to Phase 1. Otherwise, halt and await user intervention.
+
+---
+
+## Phase 1: Gather Repository Context
+
+**1.1 Fetch PR template (if exists):**
+- Check for `.github/pull_request_template.md` or `.github/PULL_REQUEST_TEMPLATE.md`
+- If found: load as PR_TEMPLATE
+- If not found: PR_TEMPLATE = null (will use best practices structure in Phase 2)
+
+**1.2 Auto-detect Ticket Identifier (if not provided):**
+- Parse CURRENT_BRANCH for pattern: `<prefix>/<ISSUE_NUMBER>-<summary>` or `<prefix>/<TICKET_KEY>-<summary>`
+- If pattern matches: extract and use as TICKET_ID
+- Otherwise: TICKET_ID remains unset (PR will proceed without ticket reference)
+
+**1.3 Analyze changes:**
+```
+git diff origin/{{DEFAULT_BRANCH}}...HEAD --stat
+```
+→ Store as CHANGES_SUMMARY (file-level overview)
+
+```
+git diff origin/{{DEFAULT_BRANCH}}...HEAD
+```
+→ Store as CHANGES_FULL (detailed diff for context)
+
+---
+
+## Phase 2: Generate PR Content
+
+### 2.1 Generate PR Title (Semantic Commit Style)
+**Format:** `<type>(<scope>): #<TICKET_ID> <brief description>` (if TICKET_ID available) or `<type>(<scope>): <brief description>` (if not)
+
+**Determine type:**
+- `feat`: new feature or capability
+- `fix`: bug fix
+- `docs`: documentation only
+- `refactor`: code restructuring (no behavior change)
+- `test`: test additions/updates
+- `chore`: build, CI/CD, config, or non-runtime changes
+- Default to most common type in commit history for the branch
+
+**Determine scope:** smallest logical component from changed files (e.g., `api`, `schema`, `prompt`, `auth`)
+
+**Generate brief summary:** Concise, imperative mood, ≤ 60 characters after `#TICKET_ID` (if present)
+
+**Examples:**
+- `feat(api): #214 add payload eviction endpoint`
+- `fix(cache): prevent stale hit after TTL expiry`
+- `docs(prompt): update work-ticket instructions`
+
+### 2.2 Generate PR Description
+
+If PR_TEMPLATE exists: use it as base structure, filling in all sections.
+
+If PR_TEMPLATE does not exist: use this best-practices structure:
+
+```
+## Description
+<Detailed explanation of changes made. Reference ticket/issue if available.>
+
+## Type of Change
+- [ ] Bug fix (non-breaking fix addressing an issue)
+- [ ] New feature (non-breaking addition)
+- [ ] Breaking change (fix or feature causing existing functionality to change)
+- [ ] Documentation update
+
+## Changes Made
+<Summary of files changed and what each does. Reference CHANGES_SUMMARY.>
+
+## Testing
+<Explanation of how changes were tested, including test results and coverage.>
+
+## Checklist
+- [ ] Code follows project style guidelines
+- [ ] Tests pass locally (unit + integration)
+- [ ] Linting passes (Spotless, ESLint, Markdownlint, etc. as applicable)
+- [ ] No merge conflicts with default branch
+- [ ] Documentation updated (if applicable)
+
+## Risk & Rollout
+<Key risks and mitigation strategies. Reference rollout plan from ticket if available.>
+
+## Related Issues
+<Link to GitHub issue or Jira ticket (e.g., Closes #214, Related to TICKET-456).>
+```
+
+Then:
+1. Fill in Description with context from changes and commit messages
+2. Analyze changed files to select relevant checkboxes
+3. Include test summary from CHANGES_SUMMARY
+4. If TICKET_ID exists: add "Closes #TICKET_ID" or appropriate link
+5. If {{ADDED_COMMENTS}} provided: append them in an "Additional Comments" section
+
+---
+
+## Phase 3: Create the PR
+
+**3.1 Auto-create PR (no user confirmation required):**
+- Use GitHub API to create PR from CURRENT_BRANCH → DEFAULT_BRANCH
+- Title: {{PR_TITLE}} (from Phase 2.1)
+- Description: {{PR_DESCRIPTION}} (from Phase 2.2)
+- Draft mode: false (create as ready-for-review)
+
+**3.2 Handle creation result:**
+- If successful: capture PR_URL and PR_NUMBER
+- If failed (e.g., branch protection rules, required status checks): report error and provide remediation guidance
+
+---
+
+## Phase 4: Output
+
+**4.1 Present PR Details to User:**
+
+```
+✅ PR Successfully Created!
+
 ### PR Title:
 {{PR_TITLE}}
 
-### PR Description:
+### PR Number:
+#{{PR_NUMBER}}
+
+### PR URL:
+{{PR_URL}}
+
+### Target Branch:
+{{DEFAULT_BRANCH}}
+
+### Changes Summary:
+{{CHANGES_SUMMARY}}
+
+### Description Preview:
 {{PR_DESCRIPTION}}
 ```
 
-Ask the user to confirm if they would like to proceed with cutting the PR with the above title and description. If not, abort the process.
----
-## Phase 4: Cut the PR
-Please cut a PR to {{BRANCH_NAME}} with a title of {{PR_TITLE}} and a description of {{PR_DESCRIPTION}. Use the create_pull_request tool from the github MCP server to create the PR and use the .github/pull-request-template.md as a template for your description, fill out all sections.
-
-If {{ADDED_COMMENTS}} exist, please include them at the end of the PR description under a section named "Additional Comments".
----
-## Phase 3: Output
-2.1 Provide the PR link only for review.
+**4.2 Next Steps (informational only):**
+- PR is ready for review by CODEOWNERS and domain reviewers
+- If applicable: request reviewers to merge when approved
+- If ticket exists: update ticket with PR link in comments

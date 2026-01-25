@@ -5,21 +5,40 @@ description: 'Review local changes against a GitHub issue before pushing to remo
 
 # Review Ticket Work
 
-Review the current local changes against the requirements and acceptance criteria from a GitHub issue before pushing to remote.
+Review the current local changes against the requirements and acceptance criteria from a GitHub issue or Jira ticket before pushing to remote.
+
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ## Required Input
 
-**GitHub Issue:** {{issueNumber}}
+**Ticket Identifier:** {{TICKET_ID}} (GitHub issue number or Jira ticket key)
 
-> ⚠️ This prompt requires a valid GitHub issue number. The issue will be used to validate that all acceptance criteria are met and the implementation aligns with requirements.
+> ⚠️ This prompt accepts either a GitHub issue number (numeric) or Jira ticket key (alphanumeric). The ticket will be used to validate that all acceptance criteria are met and the implementation aligns with requirements.
 
 ---
 
 ## Review Workflow
 
+### Step 0: Ticket Detection & Platform Resolution
+
+**Refer to `.github/prompts/includes/ticket-detection.md` for shared ticket detection logic.**
+
+Apply the auto-detection steps:
+1. Parse input (numeric → GitHub, alphanumeric → Jira)
+2. Attempt to fetch from assumed platform
+3. If failed, try fallback platform
+4. If both fail, ask user for clarification and corrected ID
+5. Establish PLATFORM and TICKET_ID context
+
+**Outputs from this step:**
+- `PLATFORM` = "github" | "jira"
+- `TICKET_ID` = normalized ticket identifier
+- Cached ticket data: title, description, AC, labels
+
 ### Step 1: Gather Context
 
-1. **Fetch GitHub issue details** using GitHub API for the provided issue number
+1. **Fetch ticket details** using appropriate platform API (GitHub or Jira) for the provided identifier
 2. **Extract and document:**
    - Summary and description
    - Acceptance Criteria (AC)

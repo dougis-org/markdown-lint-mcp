@@ -4,15 +4,11 @@ description: Determine the single next GitHub issue that can safely be started (
 
 # find-next-ticket Prompt
 
-## ⚠️ MODE ENFORCEMENT
+**Mode Requirement:**
+Refer to `.github/prompts/includes/mode-enforcement.md` for `find-next-ticket` mode requirement.
 
-**This prompt requires the `find-next-ticket` chatmode to be active.**
-
-If you selected a different chatmode (e.g., `plan-ticket`, `work-ticket`, or `analyze-ticket`), please:
-1. Switch to `.github/chatmodes/find-next-ticket.chatmode.md`
-2. Return to this prompt
-
-The chatmode provides execution guardrails; this prompt provides specific implementation workflow.
+**Tool Requirements:**
+Refer to `.github/prompts/includes/mcp-tooling-requirements.md` for mandatory MCP tool usage.
 
 ---
 
