@@ -2,6 +2,7 @@ import logger from './logger.js';
 
 let fallbackCount = 0;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export type MarkdownlintModule = any;
 
 /**
@@ -9,10 +10,12 @@ export type MarkdownlintModule = any;
  */
 async function loadMarkdownlint(): Promise<MarkdownlintModule> {
   const md = await import('markdownlint');
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const candidate = (md as any).default ?? md;
   return candidate as MarkdownlintModule;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function runLint(options: any): Promise<any> {
   const candidate = await loadMarkdownlint();
 
@@ -41,6 +44,7 @@ export async function runLint(options: any): Promise<any> {
   throw new Error('Unsupported markdownlint API shape (no sync/promise/callable export)');
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function runFix(options: any): Promise<any> {
   const optsWithFix = Object.assign({}, options, { fix: true });
   return await runLint(optsWithFix);
