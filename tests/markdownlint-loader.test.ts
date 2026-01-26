@@ -1,22 +1,24 @@
-import { jest } from '@jest/globals';
+import { jest, describe, it, expect, beforeEach } from '@jest/globals';
 
-// Tests for the markdownlint loader (RED first — loader implemented)
+// Tests for the markdownlint loader
 
 describe('markdownlint-loader (shape detection)', () => {
-  test('loader module should export runLint and runFix', async () => {
-    // Ensure the module exists and exports expected functions
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const loader = require('../src/utils/markdownlint-loader');
+  beforeEach(() => {
+    jest.resetModules();
+  });
+
+  it('should export runLint and runFix', async () => {
+    const loader = await import('../src/utils/markdownlint-loader');
     expect(loader).toHaveProperty('runLint');
     expect(loader).toHaveProperty('runFix');
   });
 
-  test('uses sync API when available', async () => {
+  it('should use sync API when available', async () => {
     await jest.isolateModulesAsync(async () => {
-      jest.resetModules();
-      // Mock markdownlint with sync
       jest.doMock('markdownlint', () => ({
-        sync: (opts: any) => ({ 'file.md': [{ lineNumber: 1, ruleNames: ['MD999'], errorDetail: 'sync' }] }),
+        sync: (_opts: unknown) => ({
+          'file.md': [{ lineNumber: 1, ruleNames: ['MD999'], errorDetail: 'sync' }],
+        }),
       }));
 
       const loader = await import('../src/utils/markdownlint-loader');
@@ -25,26 +27,24 @@ describe('markdownlint-loader (shape detection)', () => {
     });
   });
 
-  test('falls back to promise API when sync not available', async () => {
+  it('should fall back to promise API when sync not available', async () => {
     await jest.isolateModulesAsync(async () => {
-      jest.resetModules();
-      // Mock markdownlint with promise
       jest.doMock('markdownlint', () => ({
-        promise: async (opts: any) => ({ 'file.md': [{ lineNumber: 2, ruleNames: ['MD998'], errorDetail: 'promise' }] }),
+        promise: async (_opts: unknown) => ({
+          'file.md': [{ lineNumber: 2, ruleNames: ['MD998'], errorDetail: 'promise' }],
+        }),
       }));
 
       const loader = await import('../src/utils/markdownlint-loader');
-      // reset fallback counter
       loader.resetFallbackCount();
       const res = await loader.runLint({ strings: { 'file.md': 'x' }, config: {} });
       expect(res['file.md'][0].ruleNames).toEqual(['MD998']);
-      expect(loader.getFallbackCount()).toBeGreaterThanOrEqual(1);
+      expect(loader.getFallbackCount()).toBe(1);
     });
   });
 
-  test('throws on unsupported shapes', async () => {
+  it('should throw on unsupported shapes', async () => {
     await jest.isolateModulesAsync(async () => {
-      jest.resetModules();
       jest.doMock('markdownlint', () => ({}));
 
       const loader = await import('../src/utils/markdownlint-loader');
@@ -54,24 +54,26 @@ describe('markdownlint-loader (shape detection)', () => {
     });
   });
 
-  test('handles callable default module shape', async () => {
+  it('should handle callable module shape', async () => {
     await jest.isolateModulesAsync(async () => {
-      jest.resetModules();
-      // Mock callable module (function export)
-      jest.doMock('markdownlint', () => (opts: any) => Promise.resolve({ 'file.md': [{ lineNumber: 3, ruleNames: ['MD997'] }] }));
+      jest.doMock('markdownlint', () => ({
+        default: async (options: unknown) => ({
+          'file.md': [{ ruleNames: ['MD997'], lineNumber: 1 }],
+        }),
+      }));
 
       const loader = await import('../src/utils/markdownlint-loader');
+      loader.resetFallbackCount();
       const res = await loader.runLint({ strings: { 'file.md': 'x' }, config: {} });
       expect(res['file.md'][0].ruleNames).toEqual(['MD997']);
+      expect(loader.getFallbackCount()).toBe(1);
     });
   });
 
-  test('runFix sets fix option', async () => {
+  it('should set fix option in runFix', async () => {
     await jest.isolateModulesAsync(async () => {
-      jest.resetModules();
-      // Mock sync that echoes options
       jest.doMock('markdownlint', () => ({
-        sync: (opts: any) => ({ calledWith: opts }),
+        sync: (_options: unknown) => ({ calledWith: _options }),
       }));
 
       const loader = await import('../src/utils/markdownlint-loader');

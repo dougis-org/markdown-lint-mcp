@@ -42,19 +42,14 @@ interface RuleTestCase {
  */
 export function testRule(ruleName: string, rule: Rule, testCases: RuleTestCase[]): void {
   describe(`${ruleName}: ${rule.description}`, () => {
-    testCases.forEach((testCase) => {
+    testCases.forEach(testCase => {
       // Test detection
       test(`[Detection] ${testCase.name}`, async () => {
-        const results = await detectViolations(
-          ruleName, 
-          testCase.markdown, 
-          testCase.config,
-          rule
-        );
-        
+        const results = await detectViolations(ruleName, testCase.markdown, testCase.config, rule);
+
         // Verify the number of violations
-        expect(results.length).toBe(testCase.expectedViolations);
-        
+        expect(results).toHaveLength(testCase.expectedViolations);
+
         // If specific line numbers are expected, verify them
         if (testCase.expectedLineNumbers) {
           const actualLineNumbers = results.map(r => r.lineNumber);
@@ -70,19 +65,21 @@ export function testRule(ruleName: string, rule: Rule, testCases: RuleTestCase[]
           if (typeof rule.fix === 'function') {
             const fixedLines = rule.fix(lines, testCase.config);
             const fixedMarkdown = fixedLines.join('\n');
-            
-            // For specific problematic test cases, use our own comparison that ignores 
+
+            // For specific problematic test cases, use our own comparison that ignores
             // specific line ending differences
-            if (testCase.name === 'Allowing line breaks but removing other trailing spaces' ||
-                testCase.name === 'Fix for trailing spaces with line breaks') {
+            if (
+              testCase.name === 'Allowing line breaks but removing other trailing spaces' ||
+              testCase.name === 'Fix for trailing spaces with line breaks'
+            ) {
               // Normalize both strings by splitting into lines and rejoining
               const expectedLines = testCase.expectedFixedMarkdown?.split(/\r?\n/) || [];
               const actualLines = fixedMarkdown.split(/\r?\n/);
-              
+
               // Join them back with Unix-style line endings for comparison
               const normalizedExpected = expectedLines.join('\n');
               const normalizedActual = actualLines.join('\n');
-              
+
               // For this specific test, use deep equality which does a better job with strings
               expect(normalizedActual).toEqual(normalizedExpected);
             } else {
@@ -105,8 +102,8 @@ export function testRule(ruleName: string, rule: Rule, testCases: RuleTestCase[]
  * @returns Array of rule violations
  */
 export async function detectViolations(
-  ruleName: string, 
-  markdown: string, 
+  ruleName: string,
+  markdown: string,
   config: any = {},
   rule?: Rule
 ): Promise<RuleTestResult[]> {
@@ -114,36 +111,38 @@ export async function detectViolations(
   if (rule && typeof rule.validate === 'function') {
     const lines = markdown.split('\n');
     const violations = rule.validate(lines, config);
-    
+
     // Convert our rule violations to the format expected by the tests
     return violations.map(v => ({
       ruleNames: [ruleName],
       lineNumber: v.lineNumber,
       errorDetail: v.details,
-      errorRange: v.range
+      errorRange: v.range,
     }));
   }
-  
+
   // Otherwise, fall back to using markdownlint
   // Create configuration with just this rule enabled
   const ruleConfig: Record<string, any> = { default: false };
   ruleConfig[ruleName] = true;
-  
+
   // Add any custom configuration
   if (config) {
     ruleConfig[ruleName] = { ...ruleConfig[ruleName], ...config };
   }
-  
+
   // Run markdownlint in a separate Node process to avoid loading ESM into
   // the Jest/CJS runtime. We use a tiny runner script that imports the ESM
   // package and returns JSON via stdout.
   const { spawnSync } = await import('child_process');
-  const runner = spawnSync(process.execPath, [
-    require('path').join(__dirname, '../../scripts/markdownlint-runner.mjs')
-  ], {
-    input: JSON.stringify({ strings: { content: markdown }, config: ruleConfig }),
-    encoding: 'utf8'
-  });
+  const runner = spawnSync(
+    process.execPath,
+    [require('path').join(__dirname, '../../scripts/markdownlint-runner.mjs')],
+    {
+      input: JSON.stringify({ strings: { content: markdown }, config: ruleConfig }),
+      encoding: 'utf8',
+    }
+  );
 
   if (runner.status !== 0) {
     throw new Error(`markdownlint runner failed: ${runner.stderr || runner.stdout}`);
