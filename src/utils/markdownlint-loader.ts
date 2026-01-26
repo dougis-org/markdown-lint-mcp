@@ -27,8 +27,7 @@ interface MarkdownlintModule {
  * Normalize import and return the usable markdownlint object
  */
 async function loadMarkdownlint(): Promise<
-  MarkdownlintModule
-  | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>)
+  MarkdownlintModule | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>)
 > {
   const md = await import('markdownlint');
   const candidate = (md as Record<string, unknown>).default ?? md;
@@ -57,9 +56,7 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
       logger.warn('markdownlint: module is callable; attempting to call as function (promise)');
       fallbackCount++;
       return await (
-        candidate as (
-          options: Options,
-        ) => Promise<{ [filename: string]: LintResult[] }>
+        candidate as (options: Options) => Promise<{ [filename: string]: LintResult[] }>
       )(options);
     } catch (error) {
       logger.warn(
