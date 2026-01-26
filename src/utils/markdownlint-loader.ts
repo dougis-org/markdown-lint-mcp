@@ -1,4 +1,5 @@
 import logger from './logger.js';
+import type { Markdownlint, Options, LintResult } from 'markdownlint';
 
 /**
  * Module-level state tracking fallback API usage.
@@ -7,32 +8,42 @@ import logger from './logger.js';
  */
 let fallbackCount = 0;
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export type MarkdownlintModule = any;
+/**
+ * Interface describing the possible module export shapes for markdownlint.
+ * The module can export:
+ * - A sync function at the top level
+ * - A promise function at the top level
+ * - A default export with sync/promise methods
+ * - A callable function directly
+ */
+interface MarkdownlintModule {
+  sync?: (options: Options) => { [filename: string]: LintResult[] };
+  promise?: (options: Options) => Promise<{ [filename: string]: LintResult[] }>;
+  default?: Markdownlint | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
+  [key: string]: unknown;
+}
 
 /**
  * Normalize import and return the usable markdownlint object
  */
-async function loadMarkdownlint(): Promise<MarkdownlintModule> {
+async function loadMarkdownlint(): Promise<MarkdownlintModule | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>) > {
   const md = await import('markdownlint');
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const candidate = (md as any).default ?? md;
-  return candidate as MarkdownlintModule;
+  const candidate = (md as Record<string, unknown>).default ?? md;
+  return candidate as MarkdownlintModule | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function runLint(options: unknown): Promise<any> {
+export async function runLint(options: Options): Promise<{ [filename: string]: LintResult[] }> {
   const candidate = await loadMarkdownlint();
 
-  if (candidate && typeof candidate.sync === 'function') {
+  if (candidate && typeof (candidate as MarkdownlintModule).sync === 'function') {
     logger.debug('markdownlint: using sync API');
-    return candidate.sync(options);
+    return (candidate as MarkdownlintModule).sync!(options);
   }
 
-  if (candidate && typeof candidate.promise === 'function') {
+  if (candidate && typeof (candidate as MarkdownlintModule).promise === 'function') {
     logger.warn('markdownlint: sync API missing, using promise API fallback');
     fallbackCount++;
-    return await candidate.promise(options);
+    return await (candidate as MarkdownlintModule).promise!(options);
   }
 
   // Check if candidate itself is callable (for default export as function)
@@ -40,7 +51,7 @@ export async function runLint(options: unknown): Promise<any> {
     try {
       logger.warn('markdownlint: module is callable; attempting to call as function (promise)');
       fallbackCount++;
-      return await candidate(options);
+      return await (candidate as (options: Options) => Promise<{ [filename: string]: LintResult[] }>)(options);
     } catch (error) {
       logger.warn(
         'markdownlint: callable module invocation failed; falling back to unsupported API error',
@@ -50,11 +61,12 @@ export async function runLint(options: unknown): Promise<any> {
   }
 
   // Check if candidate.default is callable (for { default: async function })
-  if (candidate && typeof candidate.default === 'function') {
+  if (candidate && typeof (candidate as MarkdownlintModule).default === 'function') {
     try {
       logger.warn('markdownlint: module has callable default; attempting to call (promise)');
       fallbackCount++;
-      return await candidate.default(options);
+      const defaultFn = (candidate as MarkdownlintModule).default as (options: Options) => Promise<{ [filename: string]: LintResult[] }>;
+      return await defaultFn(options);
     } catch (error) {
       logger.warn(
         'markdownlint: callable default invocation failed; falling back to unsupported API error',
@@ -66,9 +78,8 @@ export async function runLint(options: unknown): Promise<any> {
   throw new Error('Unsupported markdownlint API shape (no sync/promise/callable export)');
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function runFix(options: unknown): Promise<any> {
-  const optsWithFix = Object.assign({}, options, { fix: true });
+export async function runFix(options: Options): Promise<{ [filename: string]: LintResult[] }> {
+  const optsWithFix = Object.assign({}, options, { fix: true }) as Options;
   return await runLint(optsWithFix);
 }
 
