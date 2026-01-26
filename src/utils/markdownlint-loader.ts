@@ -26,10 +26,15 @@ interface MarkdownlintModule {
 /**
  * Normalize import and return the usable markdownlint object
  */
-async function loadMarkdownlint(): Promise<MarkdownlintModule | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>) > {
+async function loadMarkdownlint(): Promise<
+  MarkdownlintModule
+  | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>)
+> {
   const md = await import('markdownlint');
   const candidate = (md as Record<string, unknown>).default ?? md;
-  return candidate as MarkdownlintModule | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
+  return candidate as
+    | MarkdownlintModule
+    | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
 }
 
 export async function runLint(options: Options): Promise<{ [filename: string]: LintResult[] }> {
@@ -51,7 +56,11 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
     try {
       logger.warn('markdownlint: module is callable; attempting to call as function (promise)');
       fallbackCount++;
-      return await (candidate as (options: Options) => Promise<{ [filename: string]: LintResult[] }>)(options);
+      return await (
+        candidate as (
+          options: Options,
+        ) => Promise<{ [filename: string]: LintResult[] }>
+      )(options);
     } catch (error) {
       logger.warn(
         'markdownlint: callable module invocation failed; falling back to unsupported API error',
@@ -65,7 +74,9 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
     try {
       logger.warn('markdownlint: module has callable default; attempting to call (promise)');
       fallbackCount++;
-      const defaultFn = (candidate as MarkdownlintModule).default as (options: Options) => Promise<{ [filename: string]: LintResult[] }>;
+      const defaultFn = (candidate as MarkdownlintModule).default as (
+        options: Options,
+      ) => Promise<{ [filename: string]: LintResult[] }>;
       return await defaultFn(options);
     } catch (error) {
       logger.warn(
