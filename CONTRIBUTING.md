@@ -54,7 +54,7 @@ Note: Node.js 24.x and 25.x may work, but they are not part of the official CI m
 # Fork on GitHub (visit https://github.com/dougis-org/markdown-lint-mcp)
 # Then clone your fork
 # Use the clone URL shown on your fork's GitHub page (replace YOUR-USERNAME and repo name if you renamed it):
-git clone https://github.com/YOUR-USERNAME/markdownlint-mcp.git
+git clone https://github.com/YOUR-USERNAME/markdown-lint-mcp.git
 cd markdown-lint-mcp
 
 # Add upstream remote to stay synchronized

@@ -1,4 +1,4 @@
-# markdownlint-mcp
+# markdown-lint-mcp
 
 A Model Context Protocol (MCP) server for markdown linting, formatting, and compliance checking.
 
@@ -12,7 +12,7 @@ While many MCP servers exist for converting various file formats **to** Markdown
 
 ## Solution
 
-`markdownlint-mcp` bridges this gap by providing:
+`markdown-lint-mcp` bridges this gap by providing:
 
 - **Markdown linting** using industry-standard rules
 - **Automatic fixing** of common Markdown issues  
@@ -117,7 +117,7 @@ The following 22 rules (42%) cannot be automatically fixed because they require 
 ## Installation
 
 ```bash
-npm install markdownlint-mcp
+npm install @dougis/markdown-lint-mcp
 ```
 
 ## Usage
@@ -130,8 +130,8 @@ Add to your Claude Desktop MCP configuration:
 {
   "mcpServers": {
     "markdownlint": {
-      "command": "npx",
-      "args": ["markdownlint-mcp"]
+	      "command": "npx",
+	      "args": ["@dougis/markdown-lint-mcp"]
     }
   }
 }
