@@ -1,4 +1,4 @@
-# Contributing to markdownlint-mcp
+# Contributing to markdown-lint-mcp
 
 Thank you for your interest in contributing to this project! This comprehensive guide will help you get started with development, testing, and contribution workflows.
 
@@ -51,14 +51,14 @@ Note: Node.js 24.x and 25.x may work, but they are not part of the official CI m
 ### Step 1: Fork and Clone the Repository
 
 ```bash
-# Fork on GitHub (visit https://github.com/ernestgwilsonii/markdownlint-mcp)
+# Fork on GitHub (visit https://github.com/dougis-org/markdown-lint-mcp)
 # Then clone your fork
 # Use the clone URL shown on your fork's GitHub page (replace YOUR-USERNAME and repo name if you renamed it):
-git clone https://github.com/YOUR-USERNAME/markdownlint-mcp.git
-cd markdownlint-mcp
+git clone https://github.com/YOUR-USERNAME/markdown-lint-mcp.git
+cd markdown-lint-mcp
 
 # Add upstream remote to stay synchronized
-git remote add upstream https://github.com/ernestgwilsonii/markdownlint-mcp.git
+git remote add upstream https://github.com/dougis-org/markdown-lint-mcp.git
 ```
 
 ### Step 2: Install All Dependencies
@@ -122,7 +122,7 @@ All three commands should complete successfully without errors.
 ### Project Structure
 
 ```
-markdownlint-mcp/
+markdown-lint-mcp/
 ├── src/                       # TypeScript source code
 │   ├── index.ts              # Main MCP server entry point
 │   ├── tools/                # MCP tool implementations
@@ -471,4 +471,4 @@ By contributing to this project, you agree that your contributions will be licen
 
 ---
 
-Thank you for contributing to markdownlint-mcp! 🎉
+Thank you for contributing to markdown-lint-mcp! 🎉

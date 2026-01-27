@@ -9,7 +9,6 @@ import {
 // Lazy-load `markdownlint` inside methods to avoid ESM import issues during tests
 import path from 'path';
 import { MarkdownlintIssue, ToolArguments } from './types.js';
-import type { Markdownlint } from 'markdownlint';
 import { applyRuleFixes, getImplementedRules } from './rules/index.js';
 import {
   contentToLines,
@@ -19,6 +18,7 @@ import {
   writeFile,
 } from './utils/file.js';
 import logger from './utils/logger.js';
+import { runLint, runFix } from './utils/markdownlint-loader.js';
 
 /**
  * MCP server for markdownlint functionality
@@ -176,11 +176,8 @@ export class MarkdownLintServer {
       // Load configuration (check for .markdownlint.json in file directory or use defaults)
       const config = await loadConfiguration(path.dirname(filePath));
 
-      // Run markdownlint (lazy import to avoid loading ESM into Jest process)
-      const md = await import('markdownlint');
-      const markdownlintLocal =
-        (md as unknown as { default?: Markdownlint }).default ?? (md as unknown as Markdownlint);
-      const results = markdownlintLocal.sync({
+      // Run markdownlint via loader that normalizes sync/promise shapes
+      const results = await runLint({
         strings: {
           [filePath]: content,
         },
@@ -277,12 +274,8 @@ export class MarkdownLintServer {
       // Load configuration
       const config = await loadConfiguration(path.dirname(filePath));
 
-      // Get initial issues count (lazy import)
-      const mdInit = await import('markdownlint');
-      const markdownlintInit =
-        (mdInit as unknown as { default?: Markdownlint }).default ??
-        (mdInit as unknown as Markdownlint);
-      const initialResults = markdownlintInit.sync({
+      // Get initial issues count (via loader)
+      const initialResults = await runLint({
         strings: {
           [filePath]: originalContent,
         },
@@ -355,17 +348,12 @@ export class MarkdownLintServer {
       if (fixesApplied === 0) {
         try {
           // Try markdownlint's built-in fix as a fallback
-          const mdFix = await import('markdownlint');
-          const markdownlintFix =
-            (mdFix as unknown as { default?: Markdownlint }).default ??
-            (mdFix as unknown as Markdownlint);
-          const fixResults = markdownlintFix.sync({
+          const fixResults = await runFix({
             strings: {
               [filePath]: originalContent,
             },
             config,
-            fix: true,
-          } as Parameters<Markdownlint['sync']>[0]);
+          });
 
           // Avoid indexing by user-provided keys; use first available result
           const firstResult = Object.values(fixResults)[0] as
@@ -390,11 +378,7 @@ export class MarkdownLintServer {
       }
 
       // Get final results
-      const mdFinal = await import('markdownlint');
-      const markdownlintFinal =
-        (mdFinal as unknown as { default?: Markdownlint }).default ??
-        (mdFinal as unknown as Markdownlint);
-      const finalResults = markdownlintFinal.sync({
+      const finalResults = await runLint({
         strings: {
           [filePath]: currentContent,
         },

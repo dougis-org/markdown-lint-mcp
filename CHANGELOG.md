@@ -1,11 +1,14 @@
 # Changelog
 
-All notable changes to the markdownlint-mcp project will be documented in this file.
+All notable changes to the markdown-lint-mcp project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+
+### Fixed
+- Resilient markdownlint loading to support both `sync` and promise/callable shapes; fixes `*.sync is not a function` runtime errors (GH-7).
 
 ## [1.0.1] - 2026-01-18
 
