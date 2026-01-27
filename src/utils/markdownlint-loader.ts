@@ -53,11 +53,14 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
   // Check if candidate itself is callable (for default export as function)
   if (typeof candidate === 'function') {
     try {
-      logger.warn('markdownlint: module is callable; attempting to call as function (promise)');
+      logger.warn(
+        'markdownlint: module is callable; attempting to call as function (promise)',
+      );
       fallbackCount++;
-      return await (
-        candidate as (options: Options) => Promise<{ [filename: string]: LintResult[] }>
-      )(options);
+      const fn = candidate as (
+        options: Options,
+      ) => Promise<{ [filename: string]: LintResult[] }>;
+      return await fn(options);
     } catch (error) {
       logger.warn(
         'markdownlint: callable module invocation failed; falling back to unsupported API error',
@@ -69,7 +72,9 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
   // Check if candidate.default is callable (for { default: async function })
   if (candidate && typeof (candidate as MarkdownlintModule).default === 'function') {
     try {
-      logger.warn('markdownlint: module has callable default; attempting to call (promise)');
+      logger.warn(
+        'markdownlint: module has callable default; attempting to call (promise)',
+      );
       fallbackCount++;
       const defaultFn = (candidate as MarkdownlintModule).default as (
         options: Options,
