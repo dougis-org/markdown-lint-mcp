@@ -1,6 +1,6 @@
 {
   "name": "@dougis/markdown-lint-mcp",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Model Context Protocol server for markdown linting and formatting, forked from ernestgwilsonii/markdownlint-mcp",
   "main": "dist/index.js",
   "type": "module",
@@ -75,6 +75,7 @@
     "@semantic-release/npm": "^9.0.0",
     "@semantic-release/release-notes-generator": "^10.0.0",
     "@types/jest": "^30.0.0",
+    "conventional-changelog-conventionalcommits": "^7.0.0",
     "@types/node": "^25.0.0",
     "@typescript-eslint/eslint-plugin": "^8.53.0",
     "@typescript-eslint/parser": "^8.53.0",
