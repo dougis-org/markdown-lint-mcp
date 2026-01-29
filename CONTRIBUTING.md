@@ -282,7 +282,22 @@ Tests are located in the `tests/` directory with `*.test.ts` naming convention.
 
 ### Pre-commit Checklist
 
-Before pushing or creating a pull request, ensure:
+**IMPORTANT**: Before pushing any changes, you **MUST** run the pre-push verification command:
+
+```bash
+npm run beforePush
+```
+
+This command runs all required quality gates in sequence:
+- Runs all tests (`npm test`)
+- Validates code with linter (`npm run lint`)
+- Compiles TypeScript (`npm run build`)
+
+If any check fails, fix the errors and run again before pushing.
+
+### Individual Quality Checks
+
+You can also run quality checks individually:
 
 ```bash
 # 1. Build compiles without errors
@@ -301,7 +316,7 @@ npm run format
 npm run test:coverage
 ```
 
-Or run all checks at once:
+Or run tests and lint at once:
 
 ```bash
 npm run prepublishOnly  # Runs test and lint
