@@ -39,7 +39,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
       });
     });
 
-    it('should fall back to promise API from markdownlint/promise when sync unavailable', async () => {
+    it('should fall back to promise API when sync unavailable', async () => {
       await jest.isolateModulesAsync(async () => {
         // Simulate sync import failure
         jest.doMock('markdownlint/sync', () => {
@@ -193,7 +193,8 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
         loader.resetFallbackCount();
         const res = await loader.runLint({ strings: { 'file.md': 'x' }, config: {} });
         expect(res['file.md'][0].ruleNames).toEqual(['MD994']);
-        expect(loader.getFallbackCount()).toBe(1); // Object with callable default is async, increment fallback
+        // Object with callable default is async, increment fallback
+        expect(loader.getFallbackCount()).toBe(1);
       });
     });
   });

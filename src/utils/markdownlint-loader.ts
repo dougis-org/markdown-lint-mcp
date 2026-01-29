@@ -18,7 +18,9 @@ let fallbackCount = 0;
  * - A callable function directly
  */
 interface MarkdownlintModule {
-  lint?: ((options: Options) => { [filename: string]: LintResult[] }) | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
+  lint?:
+    | ((options: Options) => { [filename: string]: LintResult[] })
+    | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
   sync?: (options: Options) => { [filename: string]: LintResult[] };
   promise?: (options: Options) => Promise<{ [filename: string]: LintResult[] }>;
   default?: Markdownlint | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
@@ -132,7 +134,9 @@ async function loadMarkdownlint(): Promise<{
 
   // All import paths exhausted
   const errorSummary = errors.join('; ');
-  const message = `Unsupported markdownlint API shape. Attempted imports: markdownlint/sync, markdownlint/promise, markdownlint (legacy). Details: ${errorSummary}`;
+  const message =
+    `Unsupported markdownlint API shape. Attempted: /sync, /promise, legacy. ` +
+    `Details: ${errorSummary}`;
   logger.error(message);
   return {
     module: {} as MarkdownlintModule,
@@ -145,7 +149,10 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
   const { module: candidate, apiPath, errors } = await loadMarkdownlint();
 
   if (apiPath === 'error') {
-    const errorMsg = `Unsupported markdownlint API shape. Attempted imports: markdownlint/sync, markdownlint/promise, markdownlint (legacy). Errors: ${errors.join('; ')}`;
+    const errorDetails = errors.join('; ');
+    const errorMsg =
+      `Unsupported markdownlint API shape. Attempted: /sync, /promise, legacy. ` +
+      `Errors: ${errorDetails}`;
     throw new Error(errorMsg);
   }
 
