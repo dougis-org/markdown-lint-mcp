@@ -18,7 +18,7 @@ let fallbackCount = 0;
  * - A callable function directly
  */
 interface MarkdownlintModule {
-  lint?: (options: Options) => { [filename: string]: LintResult[] };
+  lint?: ((options: Options) => { [filename: string]: LintResult[] }) | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
   sync?: (options: Options) => { [filename: string]: LintResult[] };
   promise?: (options: Options) => Promise<{ [filename: string]: LintResult[] }>;
   default?: Markdownlint | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
@@ -33,7 +33,9 @@ interface MarkdownlintModule {
  * 3. Legacy module-level exports (backward compatibility)
  */
 async function loadMarkdownlint(): Promise<{
-  module: MarkdownlintModule | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
+  module:
+    | MarkdownlintModule
+    | ((options: Options) => Promise<{ [filename: string]: LintResult[] }>);
   apiPath: 'sync' | 'async' | 'legacy-sync' | 'legacy-async' | 'error';
   errors: string[];
 }> {
@@ -61,7 +63,9 @@ async function loadMarkdownlint(): Promise<{
     logger.debug('markdownlint: attempting ESM subpath import markdownlint/promise');
     const promiseModule = await import('markdownlint/promise');
     if (promiseModule && typeof promiseModule.lint === 'function') {
-      logger.warn('markdownlint: ESM sync subpath unavailable, falling back to markdownlint/promise');
+      logger.warn(
+        'markdownlint: ESM sync subpath unavailable, falling back to markdownlint/promise'
+      );
       fallbackCount++;
       return {
         module: promiseModule as MarkdownlintModule,
@@ -150,7 +154,12 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
     const module = candidate as MarkdownlintModule;
     const lintFn = module.lint ?? module.sync;
     if (typeof lintFn === 'function') {
-      return lintFn(options);
+      const result = lintFn(options);
+      // If result is a promise, await it
+      if (result instanceof Promise) {
+        return await result;
+      }
+      return result;
     }
   }
 
@@ -158,7 +167,12 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
   if (apiPath === 'async') {
     const module = candidate as MarkdownlintModule;
     if (typeof module.lint === 'function') {
-      return await module.lint(options);
+      const result = module.lint(options);
+      // If result is a promise, await it
+      if (result instanceof Promise) {
+        return await result;
+      }
+      return result;
     }
   }
 
@@ -171,25 +185,17 @@ export async function runLint(options: Options): Promise<{ [filename: string]: L
       return await module.promise(options);
     }
 
-    // Try callable module/default
+    // Try callable module/default (allow errors to propagate to caller)
     if (typeof candidate === 'function') {
-      try {
-        return await (candidate as (options: Options) => Promise<{ [filename: string]: LintResult[] }>>)(
-          options
-        );
-      } catch (error) {
-        logger.error('markdownlint: callable invocation failed', error);
-      }
+      return await (
+        candidate as (options: Options) => Promise<{ [filename: string]: LintResult[] }>
+      )(options);
     }
 
     if (typeof module.default === 'function') {
-      try {
-        return await (module.default as (
-          options: Options
-        ) => Promise<{ [filename: string]: LintResult[] }>)(options);
-      } catch (error) {
-        logger.error('markdownlint: callable default invocation failed', error);
-      }
+      return await (
+        module.default as (options: Options) => Promise<{ [filename: string]: LintResult[] }>
+      )(options);
     }
   }
 
