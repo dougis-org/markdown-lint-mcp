@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Fixed MCP `lint_markdown` tool error "Unsupported markdownlint API shape" by refactoring loader to support ESM subpath imports (`markdownlint/sync`, `markdownlint/promise`) with fallback to legacy module-level exports. Resolves GH-16.
 - Resilient markdownlint loading to support both `sync` and promise/callable shapes; fixes `*.sync is not a function` runtime errors (GH-7).
 
 ## [1.0.1] - 2026-01-18
