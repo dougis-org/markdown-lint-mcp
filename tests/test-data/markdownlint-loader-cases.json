@@ -1,0 +1,52 @@
+[
+  {
+    "name": "Sync import succeeds",
+    "syncImport": "ok",
+    "asyncImport": "skip",
+    "expectedPathUsed": "sync",
+    "expectsFallbackCountIncrement": false,
+    "expectsErrorSubstring": null
+  },
+  {
+    "name": "Sync import throws, async succeeds",
+    "syncImport": "throw",
+    "asyncImport": "ok",
+    "expectedPathUsed": "async",
+    "expectsFallbackCountIncrement": true,
+    "expectsErrorSubstring": null
+  },
+  {
+    "name": "Sync missing lint export, async succeeds",
+    "syncImport": "missingLint",
+    "asyncImport": "ok",
+    "expectedPathUsed": "async",
+    "expectsFallbackCountIncrement": true,
+    "expectsErrorSubstring": null
+  },
+  {
+    "name": "Both sync and async fail",
+    "syncImport": "throw",
+    "asyncImport": "throw",
+    "expectedPathUsed": "error",
+    "expectsFallbackCountIncrement": false,
+    "expectsErrorSubstring": "markdownlint/sync.*markdownlint/promise"
+  },
+  {
+    "name": "Legacy sync module-level export",
+    "syncImport": "throw",
+    "asyncImport": "throw",
+    "legacyModuleSync": true,
+    "expectedPathUsed": "legacy-sync",
+    "expectsFallbackCountIncrement": false,
+    "expectsErrorSubstring": null
+  },
+  {
+    "name": "Legacy async module-level export with fallback",
+    "syncImport": "throw",
+    "asyncImport": "throw",
+    "legacyModuleAsync": true,
+    "expectedPathUsed": "legacy-async",
+    "expectsFallbackCountIncrement": true,
+    "expectsErrorSubstring": null
+  }
+]
