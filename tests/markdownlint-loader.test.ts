@@ -183,7 +183,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
         async (loader) => {
           const res = await loader.runFix(testFixtures.testOptions);
           expect(res.calledWith).toHaveProperty('fix', true);
-          assertLintResult(res as any, undefined as any, 1, () => loader.getFallbackCount());
+          expect(loader.getFallbackCount()).toBe(1);
         }
       );
     });

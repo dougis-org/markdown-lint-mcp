@@ -7,25 +7,89 @@ import type { Options, LintResults } from 'markdownlint';
 
 /**
  * Mock module shape for a working markdownlint API.
+ * Note: Tests may use custom implementations that return non-standard objects
+ * for verification purposes, so we use `any` to allow flexibility.
  */
 interface MockLintFunction {
-  (_options: unknown): LintResults | Promise<LintResults>;
+  (_options: unknown): any;
 }
 
 /**
  * Common test data fixtures
  */
 export const testFixtures = {
-  syncResult: { 'file.md': [{ lineNumber: 1, ruleNames: ['MD999'], errorDetail: 'sync' }] },
-  promiseResult: { 'file.md': [{ lineNumber: 2, ruleNames: ['MD998'], errorDetail: 'promise' }] },
+  syncResult: {
+    'file.md': [
+      {
+        lineNumber: 1,
+        ruleNames: ['MD999'],
+        ruleDescription: 'Sync test rule',
+        ruleInformation: null,
+        errorDetail: 'sync',
+        errorRange: [1, 1] as [number, number],
+      },
+    ],
+  } as LintResults,
+  promiseResult: {
+    'file.md': [
+      {
+        lineNumber: 2,
+        ruleNames: ['MD998'],
+        ruleDescription: 'Promise test rule',
+        ruleInformation: null,
+        errorDetail: 'promise',
+        errorRange: [1, 1] as [number, number],
+      },
+    ],
+  } as LintResults,
   legacySyncResult: {
-    'file.md': [{ lineNumber: 1, ruleNames: ['MD999'], errorDetail: 'legacy' }],
-  },
+    'file.md': [
+      {
+        lineNumber: 1,
+        ruleNames: ['MD999'],
+        ruleDescription: 'Legacy sync rule',
+        ruleInformation: null,
+        errorDetail: 'legacy',
+        errorRange: [1, 1] as [number, number],
+      },
+    ],
+  } as LintResults,
   legacyPromiseResult: {
-    'file.md': [{ lineNumber: 1, ruleNames: ['MD996'], errorDetail: 'legacy promise' }],
-  },
-  legacyCallableResult: { 'file.md': [{ ruleNames: ['MD995'], lineNumber: 1 }] },
-  legacyDefaultResult: { 'file.md': [{ ruleNames: ['MD994'], lineNumber: 1 }] },
+    'file.md': [
+      {
+        lineNumber: 1,
+        ruleNames: ['MD996'],
+        ruleDescription: 'Legacy promise rule',
+        ruleInformation: null,
+        errorDetail: 'legacy promise',
+        errorRange: [1, 1] as [number, number],
+      },
+    ],
+  } as LintResults,
+  legacyCallableResult: {
+    'file.md': [
+      {
+        lineNumber: 1,
+        ruleNames: ['MD995'],
+        ruleDescription: 'Legacy callable rule',
+        ruleInformation: null,
+        errorDetail: null,
+        errorRange: null,
+      },
+    ],
+  } as LintResults,
+  legacyDefaultResult: {
+    'file.md': [
+      {
+        lineNumber: 1,
+        ruleNames: ['MD994'],
+        ruleDescription: 'Legacy default rule',
+        ruleInformation: null,
+        errorDetail: null,
+        errorRange: null,
+      },
+    ],
+  } as LintResults,
   testOptions: { strings: { 'file.md': 'x' }, config: {} },
 };
 
@@ -105,12 +169,14 @@ export async function runWithMockedLoader<T>(
   mocks: Parameters<typeof setupMarkdownlintMocks>[0],
   testFn: (loader: any) => Promise<T>
 ): Promise<T> {
-  return jest.isolateModulesAsync(async () => {
+  let result: T;
+  await jest.isolateModulesAsync(async () => {
     await setupMarkdownlintMocks(mocks);
     const loader = await import('../../src/utils/markdownlint-loader');
     loader.resetFallbackCount();
-    return testFn(loader);
+    result = await testFn(loader);
   });
+  return result!;
 }
 
 /**

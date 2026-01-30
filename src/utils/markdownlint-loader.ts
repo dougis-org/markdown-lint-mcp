@@ -64,7 +64,7 @@ async function tryImportPromiseSubpath(
  * Check for legacy sync export on the given module candidate.
  * Returns true and logs if found, incrementing fallback counter if needed.
  */
-function tryLegacySyncExport(candidate: unknown, errors: string[]): boolean {
+function tryLegacySyncExport(candidate: unknown, _errors: string[]): boolean {
   if (candidate && typeof (candidate as Record<string, unknown>).sync === 'function') {
     logger.warn('markdownlint: using legacy module-level sync export');
     return true;
@@ -76,7 +76,7 @@ function tryLegacySyncExport(candidate: unknown, errors: string[]): boolean {
  * Check for legacy promise/callable exports on the given module candidate.
  * Returns the detected API type ('legacy-async' or null) and increments fallback if detected.
  */
-function tryLegacyAsyncExport(candidate: unknown, errors: string[]): 'legacy-async' | null {
+function tryLegacyAsyncExport(candidate: unknown, _errors: string[]): 'legacy-async' | null {
   const mod = candidate as Record<string, unknown>;
 
   // Check for legacy .promise export
@@ -207,7 +207,10 @@ async function invokeLintFunction(lintFn: Function, options: Options): Promise<L
  * @param options - Options to pass to lint
  * @returns Promise that resolves to LintResults
  */
-async function runLintFromSubpath(module: Record<string, unknown>, options: Options): Promise<LintResults> {
+async function runLintFromSubpath(
+  module: Record<string, unknown>,
+  options: Options
+): Promise<LintResults> {
   const lintFn = module.lint as unknown;
   if (typeof lintFn === 'function') {
     return invokeLintFunction(lintFn as Function, options);
