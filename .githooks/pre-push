@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Run the project's beforePush script. If it fails, abort the push.
+# Do not modify this hook to call other commands; keep single responsibility.
+
+echo "Running pre-push checks: npm run beforePush"
+if ! npm run beforePush; then
+  echo "pre-push: 'npm run beforePush' failed. Aborting push."
+  exit 1
+fi
+
+echo "pre-push: success"
+exit 0
