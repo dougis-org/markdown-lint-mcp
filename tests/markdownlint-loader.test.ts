@@ -37,7 +37,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             implementation: (_opts: unknown) => testFixtures.syncResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD999'], 0, () => loader.getFallbackCount());
         }
@@ -52,7 +52,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             implementation: async (_opts: unknown) => testFixtures.promiseResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD998'], 1, () => loader.getFallbackCount());
         }
@@ -69,7 +69,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             implementation: async (_opts: unknown) => testFixtures.promiseResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD998'], 1, () => loader.getFallbackCount());
         }
@@ -82,7 +82,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
           syncModule: { shouldThrow: true },
           promiseModule: { shouldThrow: true },
         },
-        async (loader) => {
+        async loader => {
           await expect(loader.runLint(testFixtures.testOptions)).rejects.toThrow(
             /attempted.*markdownlint\/sync.*markdownlint\/promise/i
           );
@@ -101,7 +101,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             sync: (_opts: unknown) => testFixtures.legacySyncResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD999'], 0, () => loader.getFallbackCount());
         }
@@ -117,7 +117,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             promise: async (_opts: unknown) => testFixtures.legacyPromiseResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD996'], 1, () => loader.getFallbackCount());
         }
@@ -133,7 +133,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             callable: async (options: unknown) => testFixtures.legacyCallableResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD995'], 1, () => loader.getFallbackCount());
         }
@@ -149,7 +149,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             callableAsDefault: async (options: unknown) => testFixtures.legacyDefaultResult,
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runLint(testFixtures.testOptions);
           assertLintResult(res, ['MD994'], 1, () => loader.getFallbackCount());
         }
@@ -165,7 +165,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             implementation: (_options: unknown) => ({ calledWith: _options }),
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runFix(testFixtures.testOptions);
           expect(res.calledWith).toHaveProperty('fix', true);
         }
@@ -180,7 +180,7 @@ describe('markdownlint-loader (ESM subpath imports)', () => {
             implementation: async (_options: unknown) => ({ calledWith: _options }),
           },
         },
-        async (loader) => {
+        async loader => {
           const res = await loader.runFix(testFixtures.testOptions);
           expect(res.calledWith).toHaveProperty('fix', true);
           expect(loader.getFallbackCount()).toBe(1);
