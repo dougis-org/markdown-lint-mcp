@@ -1,6 +1,6 @@
 {
   "name": "@dougis/markdown-lint-mcp",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "Model Context Protocol server for markdown linting and formatting, forked from ernestgwilsonii/markdownlint-mcp",
   "main": "dist/index.js",
   "type": "module",
