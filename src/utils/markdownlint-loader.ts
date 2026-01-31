@@ -62,7 +62,7 @@ async function tryImportPromiseSubpath(
 
 /**
  * Check for legacy sync export on the given module candidate.
- * Returns true and logs if found, incrementing fallback counter if needed.
+ * Returns true and logs if found (does not increment fallback counter).
  */
 function tryLegacySyncExport(candidate: unknown, _errors: string[]): boolean {
   if (candidate && typeof (candidate as Record<string, unknown>).sync === 'function') {
