@@ -41,7 +41,7 @@ export function getLogLevel(): LogLevel {
  */
 export function debug(message: string, meta?: unknown): void {
   if (currentLogLevel <= LogLevel.DEBUG) {
-    console.info(`[DEBUG] ${message}`, meta ? meta : '');
+    console.error(`[DEBUG] ${message}`, meta ? meta : '');
   }
 }
 
@@ -52,7 +52,7 @@ export function debug(message: string, meta?: unknown): void {
  */
 export function info(message: string, meta?: unknown): void {
   if (currentLogLevel <= LogLevel.INFO) {
-    console.info(`[INFO] ${message}`, meta ? meta : '');
+    console.error(`[INFO] ${message}`, meta ? meta : '');
   }
 }
 
