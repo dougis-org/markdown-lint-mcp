@@ -20,15 +20,15 @@ describe('integration: server startup', () => {
 
       proc.stdout.on('data', d => {
         output += d.toString();
+      });
+
+      proc.stderr.on('data', d => {
+        output += d.toString();
         if (output.includes(waitFor)) {
           clearTimeout(timeout);
           proc.kill('SIGKILL');
           resolve();
         }
-      });
-
-      proc.stderr.on('data', d => {
-        output += d.toString();
       });
 
       proc.on('error', err => {
